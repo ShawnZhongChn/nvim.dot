@@ -51,10 +51,6 @@ return {
       },
       servers = {
         -- 禁用可能冲突的 Server
-        ruff = { enabled = false },
-        ruff_lsp = { enabled = false },
-        pyright = { enabled = false },
-
         -- Python: BasedPyright (包含文档中的核心修复)
         basedpyright = {
           enabled = true,
@@ -170,7 +166,7 @@ return {
   -----------------------------------------------------------------------------
   {
     "linux-cultist/venv-selector.nvim",
-    branch = "regexp",
+    branch = "main",
     dependencies = { "neovim/nvim-lspconfig", "nvim-telescope/telescope.nvim", "mfussenegger/nvim-dap-python" },
     opts = function(_, opts)
       local home = vim.env.HOME
@@ -180,7 +176,7 @@ return {
         search = {
           conda = {
             command = conda_root and (string.format("fd /python$ %s/envs --full-path --color never", conda_root))
-              or nil,
+                or nil,
           },
         },
       }
