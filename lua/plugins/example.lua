@@ -1,3 +1,8 @@
+local function disable_lsp_formatting(client)
+  client.server_capabilities.documentFormattingProvider = false
+  client.server_capabilities.documentRangeFormattingProvider = false
+end
+
 return {
   -----------------------------------------------------------------------------
   -- 1. 核心补全引擎 (Blink.cmp - 替代 nvim-cmp)
@@ -51,6 +56,7 @@ return {
       },
       servers = {
         -- 禁用可能冲突的 Server
+        pyright = false,
         -- Python: BasedPyright (包含文档中的核心修复)
         basedpyright = {
           enabled = true,
@@ -103,6 +109,38 @@ return {
           },
         },
 
+        -- Frontend: TypeScript/JavaScript
+        tsserver = {
+          on_attach = disable_lsp_formatting,
+          init_options = { hostInfo = "neovim" },
+        },
+        eslint = {
+          on_attach = disable_lsp_formatting,
+          settings = {
+            workingDirectory = { mode = "auto" },
+            format = false,
+          },
+        },
+        cssls = {
+          on_attach = disable_lsp_formatting,
+        },
+        html = {
+          on_attach = disable_lsp_formatting,
+        },
+        jsonls = {
+          on_attach = disable_lsp_formatting,
+        },
+        emmet_ls = {
+          filetypes = {
+            "html",
+            "css",
+            "scss",
+            "javascript",
+            "javascriptreact",
+            "typescript",
+            "typescriptreact",
+          },
+        },
         -- Frontend: TailwindCSS
         tailwindcss = {},
       },
@@ -116,11 +154,31 @@ return {
     "mason-org/mason.nvim",
     opts = function(_, opts)
       opts.ensure_installed = opts.ensure_installed or {}
+      -- Remove pyright if LazyVim defaults add it.
+      for i = #opts.ensure_installed, 1, -1 do
+        if opts.ensure_installed[i] == "pyright" then
+          table.remove(opts.ensure_installed, i)
+        end
+      end
+      if not vim.tbl_contains(opts.ensure_installed, "basedpyright") then
+        table.insert(opts.ensure_installed, "basedpyright")
+      end
+    end,
+  },
+  {
+    "mason-org/mason.nvim",
+    opts = function(_, opts)
+      opts.ensure_installed = opts.ensure_installed or {}
       vim.list_extend(opts.ensure_installed, {
         -- TS/JS/React
         "eslint_d",
         "prettierd",
-        "biome",
+        "typescript-language-server",
+        "eslint-lsp",
+        "css-lsp",
+        "html-lsp",
+        "json-lsp",
+        "emmet-ls",
         "js-debug-adapter",
         "tailwindcss-language-server",
         -- Python
@@ -140,10 +198,14 @@ return {
     optional = true,
     opts = {
       formatters_by_ft = {
-        javascript = { "prettierd", "biome" },
-        typescript = { "prettierd", "biome" },
-        javascriptreact = { "prettierd", "biome" },
-        typescriptreact = { "prettierd", "biome" },
+        javascript = { "prettierd" },
+        typescript = { "prettierd" },
+        javascriptreact = { "prettierd" },
+        typescriptreact = { "prettierd" },
+        css = { "prettierd" },
+        scss = { "prettierd" },
+        html = { "prettierd" },
+        json = { "prettierd" },
         python = { "isort", "black" },
       },
     },
@@ -153,10 +215,10 @@ return {
     optional = true,
     opts = {
       linters_by_ft = {
-        javascript = { "eslint_d" },
-        typescript = { "eslint_d" },
-        javascriptreact = { "eslint_d" },
-        typescriptreact = { "eslint_d" },
+        javascript = {},
+        typescript = {},
+        javascriptreact = {},
+        typescriptreact = {},
       },
     },
   },
@@ -287,5 +349,18 @@ return {
         })
       end
     end,
+  },
+  {
+    "crnvl96/lazydocker.nvim",
+    event = "VeryLazy",
+    opts = {}, -- automatically calls require("lazydocker").setup()
+    keys = {
+      {
+        "<leader>dd",
+        "<cmd>lua require('lazydocker').toggle({ engine = 'docker' })<cr>",
+        desc = "Open LazyDocker",
+        mode = { "n", "t" },
+      },
+    },
   },
 }

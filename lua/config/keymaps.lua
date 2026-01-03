@@ -3,8 +3,8 @@
 -- Add any additional keymaps here
 
 -- 插入模式
+-- Keep Insert mode as is (this is fine for text editing)
 vim.keymap.set("i", "jk", "<C-\\><C-n>", { noremap = true })
--- 终端模式
-vim.keymap.set("t", "jk", [[<C-\><C-n>]], { noremap = true })
--- 可选：连键时间
-vim.o.timeoutlen = 300
+
+-- CHANGE Terminal mode to use double Esc instead
+vim.keymap.set("t", "<Esc><Esc>", [[<C-\><C-n>]], { noremap = true })
