@@ -54,59 +54,126 @@ return {
         severity_sort = true,
         float = { border = "rounded", source = "always" },
       },
+
       servers = {
         -- 禁用可能冲突的 Server
         pyright = false,
-        -- Python: BasedPyright (包含文档中的核心修复)
+
+        -- Python: BasedPyright
         basedpyright = {
           enabled = true,
-          -- 修复 1: 强制指定命令路径，确保能找到 Mason 安装的 binary
+
+          -- 强制指定命令路径：优先 Mason，其次 PATH（兼容 Windows .cmd）
           cmd = (function()
-            local mason_bin = vim.fn.stdpath("data") .. "/mason/bin/basedpyright-langserver"
-            if vim.fn.executable(mason_bin) == 1 then
-              return { mason_bin, "--stdio" }
+            local bin = vim.fn.stdpath("data") .. "/mason/bin/basedpyright-langserver"
+            if vim.fn.executable(bin) == 1 then
+              return { bin, "--stdio" }
+            end
+            if vim.fn.executable(bin .. ".cmd") == 1 then
+              return { bin .. ".cmd", "--stdio" }
             end
             return { "basedpyright-langserver", "--stdio" }
           end)(),
 
-          -- 修复 2: 适配 Neovim 0.11+ 的 root_dir 签名 (bufnr, on_dir)
+          filetypes = { "python" },
+          single_file_support = true,
+
+          -- Neovim 0.11+ root_dir 签名 (bufnr, on_dir)；同时兼容旧返回值写法
           root_dir = function(bufnr, on_dir)
-            -- 处理 bufnr 为文件名或数字的情况
+            local util = require("lspconfig.util")
+
             local fname = bufnr
             if type(bufnr) == "number" then
               fname = vim.api.nvim_buf_get_name(bufnr)
             end
-
-            -- 如果没有文件名，直接返回 nil
             if type(fname) ~= "string" or fname == "" then
               return nil
             end
 
-            -- 获取目录
-            local dir = vim.fs.dirname(fname)
+            local root = util.root_pattern(
+              ".git",
+              "pyproject.toml",
+              "setup.py",
+              "setup.cfg",
+              "requirements.txt",
+              "Pipfile",
+              "poetry.lock",
+              "pyrightconfig.json"
+            )(fname) or util.path.dirname(fname)
 
-            -- 寻找项目根目录标志
-            local util = require("lspconfig.util")
-            local root = util.root_pattern(".git", "setup.py", "pyproject.toml", "requirements.txt")(fname) or dir
-
-            -- 如果传入了回调函数 (0.11+ 特性)，则调用它
             if type(on_dir) == "function" then
               on_dir(root)
               return
             end
-
             return root
           end,
 
           settings = {
             basedpyright = {
+              -- 防止与 Ruff/其它工具抢“整理导入”
+              disableOrganizeImports = true,
+
               analysis = {
+                -- 对齐你的 TOML
+                typeCheckingMode = "standard",
+                useLibraryCodeForTypes = true,
+
                 autoImportCompletions = true,
                 diagnosticMode = "workspace",
-                typeCheckingMode = "basic", -- 可根据需要改为 standard
+
+                -- 严格性降级（PyCharm 模拟器）
+                reportAny = "none",
+                reportExplicitAny = "none",
+                reportUnknownVariableType = "none",
+                reportUnknownMemberType = "none",
+                reportUnknownParameterType = "none",
+                reportUnknownArgumentType = "none",
+                reportMissingTypeStubs = "none",
+                reportPrivateUsage = "none",
+
+                -- 关键：动态属性别炸红
+                reportAttributeAccessIssue = "warning",
+
+                reportUnusedImport = "warning",
+                reportUnusedVariable = "warning",
+                reportUnreachable = "warning",
+
+                -- 视觉降噪
+                inlayHints = {
+                  variableTypes = false,
+                  functionReturnTypes = false,
+                },
               },
             },
           },
+        },
+
+        -- Python: Ruff（lint / code actions；hover 建议交给 basedpyright）
+        ruff = {
+          enabled = true,
+
+          -- Ruff LSP 默认就是 `ruff server`（同样优先 Mason；兼容 Windows .cmd）
+          cmd = (function()
+            local bin = vim.fn.stdpath("data") .. "/mason/bin/ruff"
+            if vim.fn.executable(bin) == 1 then
+              return { bin, "server" }
+            end
+            if vim.fn.executable(bin .. ".cmd") == 1 then
+              return { bin .. ".cmd", "server" }
+            end
+            return { "ruff", "server" }
+          end)(),
+
+          init_options = {
+            settings = {
+              -- 需要的话把 ruff server 的设置写这里（一般会自动读取项目里的配置文件）
+            },
+          },
+
+          on_attach = function(client, _bufnr)
+            -- 避免 hover 冲突：hover/补全/跳转交给 basedpyright
+            client.server_capabilities.hoverProvider = false
+          end,
         },
 
         -- Frontend: TypeScript/JavaScript
@@ -121,15 +188,9 @@ return {
             format = false,
           },
         },
-        cssls = {
-          on_attach = disable_lsp_formatting,
-        },
-        html = {
-          on_attach = disable_lsp_formatting,
-        },
-        jsonls = {
-          on_attach = disable_lsp_formatting,
-        },
+        cssls = { on_attach = disable_lsp_formatting },
+        html = { on_attach = disable_lsp_formatting },
+        jsonls = { on_attach = disable_lsp_formatting },
         emmet_ls = {
           filetypes = {
             "html",
@@ -141,12 +202,10 @@ return {
             "typescriptreact",
           },
         },
-        -- Frontend: TailwindCSS
         tailwindcss = {},
       },
     },
   },
-
   -----------------------------------------------------------------------------
   -- 3. Mason 工具链
   -----------------------------------------------------------------------------
@@ -238,7 +297,7 @@ return {
         search = {
           conda = {
             command = conda_root and (string.format("fd /python$ %s/envs --full-path --color never", conda_root))
-                or nil,
+              or nil,
           },
         },
       }
@@ -350,6 +409,10 @@ return {
       end
     end,
   },
+
+  -----------------------------------------------------------------------------
+  -- 9. Docker
+  -----------------------------------------------------------------------------
   {
     "crnvl96/lazydocker.nvim",
     event = "VeryLazy",
