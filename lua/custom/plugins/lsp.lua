@@ -1,26 +1,67 @@
 --- @Note Main LSP Configuration (nvim-lspconfig)
 --- 集成了 Mason, Blink.cmp, Lazydev 以及自定义的 Python 增强和 UI 美化
---------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
 -- Options Components
 -------------------------------------------------------------------------------
 
+--- @return function
+--- @Note 定义 Python 项目的根目录检测逻辑 (优先级：配置文件 > Git > 当前目录)
+local _get_python_root = function()
+  local util = require 'lspconfig.util'
+  return util.root_pattern('pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', 'Pipfile', '.git')
+end
+
+--- @return function
+--- @Note 定义 lua 项目的根目录检测逻辑 (优先级：配置文件 > Git > 当前目录)
+local _get_lua_root = function()
+  local util = require 'lspconfig.util'
+  return util.root_pattern 'init.lua'
+end
+
 --- @return table
 --- @Note 定义需要安装的 LSP 服务器及其特定设置
 local _get_servers = function()
+  local python_root = _get_python_root()
+  local lua_root = _get_lua_root()
+
   return {
-    -- Lua 配置：lazydev 会自动处理 Neovim API，这里保持精简
+    -- Lua 配置
     lua_ls = {
+      root_dir = lua_root,
       settings = {
         Lua = {
           completion = { callSnippet = 'Replace' },
         },
       },
     },
-    -- Python 配置：按需取消注释
-    -- pyright = {},
-    -- basedpyright = {},
+
+    -- Python: BasedPyright (负责: 类型检查, 定义跳转, 补全)
+    basedpyright = {
+      root_dir = python_root, -- 显式指定根目录检测
+      settings = {
+        basedpyright = {
+          disableOrganizeImports = true, -- 交给 Ruff 处理
+          analysis = {
+            typeCheckingMode = 'standard', -- 可选: off, basic, standard, strict, all
+            autoSearchPaths = true,
+            useLibraryCodeForTypes = true,
+            diagnosticMode = 'openFilesOnly',
+          },
+        },
+      },
+    },
+
+    -- Python: Ruff (负责: Linting, Formatting, Import 排序)
+    ruff = {
+      root_dir = python_root,
+      init_options = {
+        settings = {
+          args = {}, -- 可在此添加额外的 CLI 参数
+        },
+      },
+    },
   }
 end
 
@@ -55,13 +96,11 @@ end
 
 --- @Note 核心增强：合并定义(gd)与引用(grr)到一个列表展示
 local _lsp_merged_search = function()
-  -- include_declaration = true : 让引用列表包含变量定义的位置
-  -- prompt_title : 明确告知用户这是合并视图
   require('telescope.builtin').lsp_references {
     include_declaration = true,
-    include_current_line = false, -- 过滤掉光标所在的当前行，减少噪音
+    include_current_line = false,
     prompt_title = 'LSP: Definitions & References',
-    show_line = false, -- 列表更紧凑
+    show_line = false,
   }
 end
 
@@ -118,10 +157,8 @@ local _on_attach = function(event)
     vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
   end
 
-  -- [修改] gd 现在会展示合并列表，而不是直接跳转
+  -- 核心导航
   map('gd', _lsp_merged_search, '[G]oto [D]efinition & References')
-
-  -- 其他核心快捷键
   map('grn', vim.lsp.buf.rename, '[R]e[n]ame')
   map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
   map('grr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences (Only)')
@@ -137,7 +174,7 @@ local _on_attach = function(event)
   end
 
   -- Python 专属增强：注册 FoldDocstrings 命令
-  if vim.tbl_contains({ 'pyright', 'basedpyright', 'pyrefly' }, client_new.name) then
+  if vim.tbl_contains({ 'basedpyright', 'ruff' }, client_new.name) then
     vim.api.nvim_buf_create_user_command(event.buf, 'FoldDocstrings', _fold_python_docstrings, { range = true })
     map('zp', '<cmd>FoldDocstrings<CR>', '[P]ython: Fold Docstrings')
   end
@@ -178,7 +215,7 @@ end
 
 --- @Note 整合与初始化
 local _setup_core = function()
-  -- 1. 全局 UI 设置：浮窗圆角化
+  -- 1. 全局 UI 设置
   vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = 'rounded' })
   vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signatureHelp, { border = 'rounded' })
 
@@ -195,21 +232,23 @@ local _setup_core = function()
   local capabilities = require('blink.cmp').get_lsp_capabilities()
   local servers = _get_servers()
   local ensure_installed = vim.tbl_keys(servers or {})
-
-  -- stylua 仅安装，不作为 LSP 启动
   vim.list_extend(ensure_installed, { 'stylua' })
 
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
-  -- 5. 初始化 Mason-LSPConfig (防冲突白名单机制)
+  -- 5. 初始化 Mason-LSPConfig
   require('mason-lspconfig').setup {
     handlers = {
       function(server_name)
         local server = servers[server_name]
-        -- [修复] 只有在 _get_servers 中明确定义的才执行 setup()
-        -- 这防止了 stylua 等工具抢占 LSP 跳转功能
         if server then
           server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+
+          if server_name == 'basedpyright' then
+            server.capabilities.documentFormattingProvider = false
+            server.capabilities.documentRangeFormattingProvider = false
+          end
+
           require('lspconfig')[server_name].setup(server)
         end
       end,
@@ -224,15 +263,11 @@ end
 return {
   'neovim/nvim-lspconfig',
   dependencies = {
-    -- 核心：Lazydev 解决 Lua 配置的全局变量问题
     { 'folke/lazydev.nvim', ft = 'lua', opts = {} },
-    -- 核心：Mason 工具链管理
     { 'mason-org/mason.nvim', opts = {} },
     'mason-org/mason-lspconfig.nvim',
     'WhoIsSethDaniel/mason-tool-installer.nvim',
-    -- UI：LSP 进度通知
     { 'j-hui/fidget.nvim', opts = {} },
-    -- 补全源支持
     'saghen/blink.cmp',
   },
   config = _setup_core,

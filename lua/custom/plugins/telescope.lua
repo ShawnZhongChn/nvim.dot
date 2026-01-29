@@ -1,4 +1,38 @@
---- @Note Fuzzy Finder (files, lsp, etc) 配置文件
+--------------------------------------------------------------------------
+-- Header: Telescope 配置 (支持 Zoxide 项目制跳转 - 安全版)
+--------------------------------------------------------------------------
+
+--- @param selection table Zoxide 选择的条目对象
+--- @Note [Project Mode] 跳转目录并清理所有旧 Buffer (包含安全检查)
+local _on_project_open = function(selection)
+  -- 1. 安全检查：遍历所有 Buffer 查看是否有未保存更改
+  local modified_buffers = {}
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    -- 检查 buffer 是否被修改 (modified) 且是加载的 (loaded)
+    if vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_get_option_value('modified', { buf = buf }) then
+      table.insert(modified_buffers, vim.api.nvim_buf_get_name(buf))
+    end
+  end
+
+  -- 如果发现有未保存的文件，发出警告并终止操作
+  if #modified_buffers > 0 then
+    vim.notify('Abort: You have unsaved changes!', vim.log.levels.ERROR)
+    -- 可选：打印出具体哪些文件没保存
+    -- for _, file in ipairs(modified_buffers) do vim.notify('Unsaved: ' .. file, vim.log.levels.WARN) end
+    return
+  end
+
+  -- 2. 切换工作目录
+  vim.cmd.cd(selection.path)
+
+  -- 3. 清理 Buffer
+  -- 此时已确认无未保存文件，使用 %bd! 是安全的，它可以强制清理掉一些非文件类型的 buffer (如 NvimTree, Output 面板等)
+  vim.cmd 'silent! %bd!'
+
+  -- 4. 打印提示
+  vim.notify('Project loaded: ' .. selection.path, vim.log.levels.INFO)
+end
+
 --------------------------------------------------------------------------
 
 --- @return table
@@ -12,9 +46,15 @@ local _get_opts = function()
       ['ui-select'] = {
         require('telescope.themes').get_dropdown(),
       },
-      -- zoxide 扩展的配置（可选）
+      -- zoxide 扩展配置
       zoxide = {
-        prompt_title = '[ Zoxide List ]',
+        prompt_title = '[ Project Switcher ]',
+        mappings = {
+          ['<CR>'] = {
+            keepinsert = true,
+            action = _on_project_open,
+          },
+        },
       },
     },
   }
@@ -35,11 +75,13 @@ local _set_keymaps = function(builtin)
   vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
   vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
   vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+
+  -- Zoxide 入口
   vim.keymap.set('n', '<leader>sz', function()
     require('telescope').extensions.zoxide.list()
-  end, { desc = '[S]earch [Z]oxide' })
+  end, { desc = '[S]earch [Z]oxide Projects' })
 
-  -- 高级用法：当前 Buffer 模糊搜索
+  -- 高级用法
   vim.keymap.set('n', '<leader>/', function()
     builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
       winblend = 10,
@@ -47,7 +89,6 @@ local _set_keymaps = function(builtin)
     })
   end, { desc = '[/] Fuzzily search in current buffer' })
 
-  -- 高级用法：在已打开的文件中 Grep
   vim.keymap.set('n', '<leader>s/', function()
     builtin.live_grep {
       grep_open_files = true,
@@ -55,7 +96,6 @@ local _set_keymaps = function(builtin)
     }
   end, { desc = '[S]earch [/] in Open Files' })
 
-  -- 快捷键：搜索 Neovim 配置文件
   vim.keymap.set('n', '<leader>sc', function()
     builtin.find_files { cwd = vim.fn.stdpath 'config' }
   end, { desc = '[S]earch [C]onfig files' })
@@ -68,15 +108,12 @@ local _setup_core = function()
   local telescope = require 'telescope'
   local builtin = require 'telescope.builtin'
 
-  -- 1. 先进行基础设置
   telescope.setup(_get_opts())
 
-  -- 2. 显式加载扩展（必须在 setup 之后）
   pcall(telescope.load_extension, 'fzf')
   pcall(telescope.load_extension, 'ui-select')
   pcall(telescope.load_extension, 'zoxide')
 
-  -- 3. 设置快捷键
   _set_keymaps(builtin)
 end
 
@@ -89,7 +126,7 @@ return {
   event = 'VimEnter',
   dependencies = {
     'nvim-lua/plenary.nvim',
-    'jvgrootveld/telescope-zoxide', -- 必须添加此依赖
+    'jvgrootveld/telescope-zoxide',
     {
       'nvim-telescope/telescope-fzf-native.nvim',
       build = 'make',
