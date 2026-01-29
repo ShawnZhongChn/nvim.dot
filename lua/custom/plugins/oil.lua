@@ -1,4 +1,4 @@
----------------------------------------------------------------- @Note: oil.nvim 插件配置
+----------------- @Note: oil.nvim 插件配置
 --- 允许以编辑 buffer 的方式管理文件系统，并支持自定义 Winbar 显示。
 
 -------------------------------------------------------------------------------
@@ -50,19 +50,37 @@ local _setup_keymaps = function()
   end, { desc = 'Oil: Toggle floating window' })
 end
 
+--- @Note: 配置进入 Oil 时自动打开预览窗口
+local _setup_auto_preview = function()
+  vim.api.nvim_create_autocmd('User', {
+    pattern = 'OilEnter',
+    callback = vim.schedule_wrap(function(args)
+      local oil = require 'oil'
+      -- 校验：确保当前 Buffer 是触发事件的 Buffer 且光标下有有效条目
+      if vim.api.nvim_get_current_buf() == args.data.buf and oil.get_cursor_entry() then
+        oil.open_preview()
+      end
+    end),
+  })
+end
+
 -------------------------------------------------------------------------------
 -- Core Logic
 -------------------------------------------------------------------------------
 
 --- @Note: 整合配置与初始化
 local _init = function()
-  -- 暴露私有路径函数给全局，供 winbar 的 v:lua 字符串访问
   _G._oil_winbar_provider = _get_oil_winbar_path
 
   require('oil').setup {
     columns = { 'icon' },
-    -- 注入圆角浮窗配置
     float = _get_float_opts(),
+    -- 新增预览配置，优化自动打开时的布局
+    preview = {
+      split = 'right', -- 强制在右侧打开预览
+      width = nil,
+      min_width = { 40, 0.4 },
+    },
     keymaps = {
       ['<C-h>'] = false,
       ['<C-l>'] = false,
@@ -85,6 +103,7 @@ local _init = function()
   }
 
   _setup_keymaps()
+  _setup_auto_preview() -- 初始化自动预览逻辑
 end
 
 -------------------------------------------------------------------------------

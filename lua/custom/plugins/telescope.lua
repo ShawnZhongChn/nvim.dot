@@ -56,9 +56,9 @@ local _set_keymaps = function(builtin)
   end, { desc = '[S]earch [/] in Open Files' })
 
   -- 快捷键：搜索 Neovim 配置文件
-  vim.keymap.set('n', '<leader>sn', function()
+  vim.keymap.set('n', '<leader>sc', function()
     builtin.find_files { cwd = vim.fn.stdpath 'config' }
-  end, { desc = '[S]earch [N]eovim files' })
+  end, { desc = '[S]earch [C]onfig files' })
 end
 
 --------------------------------------------------------------------------

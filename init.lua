@@ -1,30 +1,70 @@
--- Load core configurations
-require 'core.options'
-require 'core.keymaps'
-require 'core.autocmds'
+--- @Note: Neovim Entry Point & Lazy.nvim Bootstrap
+-- https://github.com/folke/lazy.nvim
+--------------------------------------------------------------------------------
 
--- [[ Install `lazy.nvim` plugin manager ]]
---    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
-local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
-if not (vim.uv or vim.loop).fs_stat(lazypath) then
-  local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
-  local out = vim.fn.system { 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath }
-  if vim.v.shell_error ~= 0 then
-    error('Error cloning lazy.nvim:\n' .. out)
-  end
+--------------------------------------------------------------------------------
+-- Options Components
+--------------------------------------------------------------------------------
+
+--- 加载基础核心配置模块
+local function _load_core_config()
+  require 'core.options'
+  require 'core.keymaps'
+  require 'core.autocmds'
 end
 
----@type vim.Option
-local rtp = vim.opt.rtp
-rtp:prepend(lazypath)
+--- 获取 Lazy.nvim 初始化配置
+--- @return table
+local function _get_lazy_opts()
+  return {
+    -- 自动从 custom/plugins 目录导入插件配置
+    { import = 'custom.plugins' },
+  }
+end
 
--- [[ Configure and install plugins ]]
-require('lazy').setup {
+--------------------------------------------------------------------------------
+-- Enhancement Methods
+--------------------------------------------------------------------------------
 
-  -- The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
-  { import = 'custom.plugins' },
-  { import = 'kickstart.plugins' },
-}
+--- 引导安装 Lazy.nvim (Bootstrap)
+--- @return string lazypath 插件管理器路径
+local function _ensure_lazy_installed()
+  local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
+  if not (vim.uv or vim.loop).fs_stat(lazypath) then
+    local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
+    local out = vim.fn.system {
+      'git',
+      'clone',
+      '--filter=blob:none',
+      '--branch=stable',
+      lazyrepo,
+      lazypath,
+    }
+    if vim.v.shell_error ~= 0 then
+      error('Error cloning lazy.nvim:\n' .. out)
+    end
+  end
+  return lazypath
+end
 
--- The line beneath this is called `modeline`. See `:help modeline`
+--------------------------------------------------------------------------------
+-- Core Logic
+--------------------------------------------------------------------------------
+
+--- 主初始化流程
+local function _init()
+  -- 1. 加载核心配置 (确保 mapleader 在 Lazy 启动前设置)
+  _load_core_config()
+
+  -- 2. 注入插件管理器路径
+  local lazypath = _ensure_lazy_installed()
+  vim.opt.rtp:prepend(lazypath)
+
+  -- 3. 启动插件系统
+  require('lazy').setup(_get_lazy_opts())
+end
+
+-- 执行初始化
+_init()
+
 -- vim: ts=2 sts=2 sw=2 et

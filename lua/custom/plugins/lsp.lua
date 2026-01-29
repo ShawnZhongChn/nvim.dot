@@ -1,10 +1,16 @@
 --- @Note Main LSP Configuration (nvim-lspconfig)
+--- 集成了 Mason, Blink.cmp, Lazydev 以及自定义的 Python 增强和 UI 美化
 --------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+-- Options Components
+-------------------------------------------------------------------------------
 
 --- @return table
 --- @Note 定义需要安装的 LSP 服务器及其特定设置
 local _get_servers = function()
   return {
+    -- Lua 配置：lazydev 会自动处理 Neovim API，这里保持精简
     lua_ls = {
       settings = {
         Lua = {
@@ -12,6 +18,9 @@ local _get_servers = function()
         },
       },
     },
+    -- Python 配置：按需取消注释
+    -- pyright = {},
+    -- basedpyright = {},
   }
 end
 
@@ -40,10 +49,24 @@ local _get_diagnostic_opts = function()
   }
 end
 
---------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Enhancement Methods
+-------------------------------------------------------------------------------
+
+--- @Note 核心增强：合并定义(gd)与引用(grr)到一个列表展示
+local _lsp_merged_search = function()
+  -- include_declaration = true : 让引用列表包含变量定义的位置
+  -- prompt_title : 明确告知用户这是合并视图
+  require('telescope.builtin').lsp_references {
+    include_declaration = true,
+    include_current_line = false, -- 过滤掉光标所在的当前行，减少噪音
+    prompt_title = 'LSP: Definitions & References',
+    show_line = false, -- 列表更紧凑
+  }
+end
 
 --- @param args table
---- @Note Python 专用的 Treesitter 文档折叠逻辑
+--- @Note Python 专用：利用 Treesitter 智能折叠 Docstrings
 local _fold_python_docstrings = function(args)
   local query = vim.treesitter.query.parse(
     'python',
@@ -53,12 +76,14 @@ local _fold_python_docstrings = function(args)
     (class_definition body: (block (expression_statement (string) @docstring)))
   ]]
   )
+
   local start_line = args.range >= 2 and args.line1 or nil
   local end_line = args.range >= 2 and args.line2 or nil
   local parser = vim.treesitter.get_parser(0, 'python')
   if not parser then
     return
   end
+
   local tree = parser:parse()[1]:root()
   for _, node in query:iter_captures(tree, 0, start_line, end_line) do
     local s_row, _, e_row, _ = node:range()
@@ -76,6 +101,7 @@ end
 --- @param method string
 --- @param bufnr number
 --- @return boolean
+--- @Note 版本兼容性检查
 local _client_supports_method = function(client, method, bufnr)
   if vim.fn.has 'nvim-0.11' == 1 then
     return client:supports_method(method, bufnr)
@@ -85,19 +111,21 @@ local _client_supports_method = function(client, method, bufnr)
 end
 
 --- @param event table
---- @Note 当 LSP 挂载到 Buffer 时执行的操作
+--- @Note 当 LSP 挂载到 Buffer 时执行的操作（快捷键与自动命令）
 local _on_attach = function(event)
   local map = function(keys, func, desc, mode)
     mode = mode or 'n'
     vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
   end
 
-  -- 核心快捷键
+  -- [修改] gd 现在会展示合并列表，而不是直接跳转
+  map('gd', _lsp_merged_search, '[G]oto [D]efinition & References')
+
+  -- 其他核心快捷键
   map('grn', vim.lsp.buf.rename, '[R]e[n]ame')
   map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
-  map('grr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+  map('grr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences (Only)')
   map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
-  map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
   map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
   map('gO', require('telescope.builtin').lsp_document_symbols, 'Open Document Symbols')
   map('gW', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Open Workspace Symbols')
@@ -108,19 +136,35 @@ local _on_attach = function(event)
     return
   end
 
-  -- 为 Python 注入专属增强
-  if client_new.name == 'pyright' or client_new.name == 'basedpyright' or client_new.name == 'pyrefly' then
+  -- Python 专属增强：注册 FoldDocstrings 命令
+  if vim.tbl_contains({ 'pyright', 'basedpyright', 'pyrefly' }, client_new.name) then
     vim.api.nvim_buf_create_user_command(event.buf, 'FoldDocstrings', _fold_python_docstrings, { range = true })
-    map('zp', '<cmd>FoldDocstrings<CR>', 'Fold Docstrings')
+    map('zp', '<cmd>FoldDocstrings<CR>', '[P]ython: Fold Docstrings')
   end
 
-  -- 文档高亮与 Inlay Hints (逻辑保持不变)
+  -- 自动高亮 (CursorHold)
   if _client_supports_method(client_new, vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
     local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
-    vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, { buffer = event.buf, group = highlight_augroup, callback = vim.lsp.buf.document_highlight })
-    vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, { buffer = event.buf, group = highlight_augroup, callback = vim.lsp.buf.clear_references })
+    vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+      buffer = event.buf,
+      group = highlight_augroup,
+      callback = vim.lsp.buf.document_highlight,
+    })
+    vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
+      buffer = event.buf,
+      group = highlight_augroup,
+      callback = vim.lsp.buf.clear_references,
+    })
+    vim.api.nvim_create_autocmd('LspDetach', {
+      group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
+      callback = function(event2)
+        vim.lsp.buf.clear_references()
+        vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-highlight', buffer = event2.buf }
+      end,
+    })
   end
 
+  -- Inlay Hints 切换
   if _client_supports_method(client_new, vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
     map('<leader>th', function()
       vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
@@ -128,52 +172,67 @@ local _on_attach = function(event)
   end
 end
 
---------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Core Logic
+-------------------------------------------------------------------------------
 
 --- @Note 整合与初始化
 local _setup_core = function()
-  -- 1. 设置全局 LSP 句柄 (圆角边框)
+  -- 1. 全局 UI 设置：浮窗圆角化
   vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = 'rounded' })
   vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signatureHelp, { border = 'rounded' })
 
-  -- 2. 注册 LspAttach
+  -- 2. 注册 LspAttach 监听
   vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
     callback = _on_attach,
   })
 
-  -- 3. 应用诊断配置
+  -- 3. 应用诊断样式
   vim.diagnostic.config(_get_diagnostic_opts())
 
-  -- 4. Mason 与服务器配置 (逻辑保持不变)
+  -- 4. 准备 Capabilities 与 Servers
   local capabilities = require('blink.cmp').get_lsp_capabilities()
   local servers = _get_servers()
   local ensure_installed = vim.tbl_keys(servers or {})
+
+  -- stylua 仅安装，不作为 LSP 启动
   vim.list_extend(ensure_installed, { 'stylua' })
 
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+
+  -- 5. 初始化 Mason-LSPConfig (防冲突白名单机制)
   require('mason-lspconfig').setup {
     handlers = {
       function(server_name)
-        local server = servers[server_name] or {}
-        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-        require('lspconfig')[server_name].setup(server)
+        local server = servers[server_name]
+        -- [修复] 只有在 _get_servers 中明确定义的才执行 setup()
+        -- 这防止了 stylua 等工具抢占 LSP 跳转功能
+        if server then
+          server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+          require('lspconfig')[server_name].setup(server)
+        end
       end,
     },
   }
 end
 
---------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Plugin Spec
+-------------------------------------------------------------------------------
 
---- @return table
 return {
   'neovim/nvim-lspconfig',
   dependencies = {
+    -- 核心：Lazydev 解决 Lua 配置的全局变量问题
     { 'folke/lazydev.nvim', ft = 'lua', opts = {} },
+    -- 核心：Mason 工具链管理
     { 'mason-org/mason.nvim', opts = {} },
     'mason-org/mason-lspconfig.nvim',
     'WhoIsSethDaniel/mason-tool-installer.nvim',
+    -- UI：LSP 进度通知
     { 'j-hui/fidget.nvim', opts = {} },
+    -- 补全源支持
     'saghen/blink.cmp',
   },
   config = _setup_core,
