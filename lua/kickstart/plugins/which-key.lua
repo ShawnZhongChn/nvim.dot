@@ -1,15 +1,23 @@
-return {
-  'folke/which-key.nvim',
-  event = 'VeryLazy', -- 改为 VeryLazy，启动速度更快且不影响首屏加载
-  opts = {
-    -- 极致响应性能
-    delay = 0,
-    -- 现代化的 UI 风格
-    preset = 'helix', -- 比默认的 classic 更清爽，适合 4K 屏幕
+---
+--- @Note: Which-key 快捷键辅助提示插件
+--- 采用中央管理模式，确保 UI 触发响应并解决组名显示问题
+---
 
+-------------------------------------------------------------------------------
+-- Options Components
+-------------------------------------------------------------------------------
+
+--- @Note 获取基础视觉与交互配置
+--- @return table
+local _get_base_opts = function()
+  return {
+    delay = 0,
+    preset = 'helix', -- 适合 4K 屏幕
+    triggers = {
+      { '<auto>', mode = 'nxso' },
+    },
     icons = {
       mappings = vim.g.have_nerd_font,
-      -- 如果有 Nerd Font，Keys 设为 {} 会自动使用漂亮的高清图标
       keys = vim.g.have_nerd_font and {} or {
         Up = 'UP ',
         Down = 'DN ',
@@ -26,32 +34,62 @@ return {
         Space = 'SPC ',
       },
     },
-
-    -- 窗口样式优化
     win = {
-      -- 既然你在 Arch/Hyprland 下可能用了透明效果，这里可以微调
-      border = 'rounded', -- 圆角边框更现代
-      padding = { 1, 2 }, -- 增加一点呼吸感
-      wo = {
-        winblend = 5, -- 保持微弱透明度，呼应你的 Hyprland 风格
-      },
+      border = 'rounded',
+      padding = { 1, 2 },
+      wo = { winblend = 5 }, -- 呼应你的 Hyprland 风格
     },
+  }
+end
 
-    -- 快捷键组定义 (V3 Spec 语法)
-    spec = {
-      { '<leader>c', group = '[C]ode', mode = { 'n', 'x' } },
-      { '<leader>d', group = '[D]ocument' },
-      { '<leader>r', group = '[R]ename' },
-      { '<leader>s', group = '[S]earch' },
-      { '<leader>w', group = '[W]orkspace' },
-      { '<leader>t', group = '[T]oggle' },
-      { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+--- @Note 定义全局组名映射 (Spec)
+--- 显式定义组名可以防止出现 "+N keymaps" 字样
+--- @return table
+local _get_wk_spec = function()
+  return {
+    { '<leader>c', group = '[C]ode', mode = { 'n', 'x' } },
+    { '<leader>d', group = '[D]ocument' },
+    { '<leader>r', group = '[R]ename' },
+    { '<leader>s', group = '[S]earch' },
+    { '<leader>w', group = '[W]orkspace' },
+    { '<leader>t', group = '[T]oggle' },
+    { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+    { '<leader>f', group = '[F]iles / Oil', icon = '󰉓 ' },
+    { '<leader>l', group = '[L]azyGit', icon = '󰊢 ' },
+    { '<leader>q', proxy = '<c-w>', group = '[W]indows' },
+  }
+end
 
-      -- 专门为你的 Oil.nvim 增加一个直观的组
-      { '<leader>f', group = '[F]iles / Oil' },
+-------------------------------------------------------------------------------
+-- Enhancement Methods
+-------------------------------------------------------------------------------
 
-      -- 增加窗口代理提示
-      { '<leader>q', proxy = '<c-w>', group = '[W]indows' },
-    },
-  },
+--- @Note 核心管理逻辑
+--- 使用 wk.add 确保在插件加载后立即注入组名映射
+local _apply_management = function()
+  local wk = require 'which-key'
+  wk.add(_get_wk_spec())
+end
+
+-------------------------------------------------------------------------------
+-- Core Logic
+-------------------------------------------------------------------------------
+
+--- @Note 插件初始化
+--- @param opts table
+local _setup = function(_, opts)
+  local wk = require 'which-key'
+  wk.setup(opts)
+  _apply_management() -- 确保映射表被正确加载
+end
+
+-------------------------------------------------------------------------------
+-- Plugin Spec
+-------------------------------------------------------------------------------
+
+return {
+  'folke/which-key.nvim',
+  event = 'VeryLazy',
+  opts = _get_base_opts(),
+  config = _setup,
 }
