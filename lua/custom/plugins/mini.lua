@@ -15,18 +15,6 @@ end
 
 --------------------------------------------------------------------------
 
---- @Note 对 statusline 进行格式增强
-local _enhance_statusline = function()
-  local statusline = require 'mini.statusline'
-  -- 自定义位置栏格式为 LINE:COLUMN
-  ---@diagnostic disable-next-line: duplicate-set-field
-  statusline.section_location = function()
-    return '%2l:%-2v'
-  end
-end
-
---------------------------------------------------------------------------
-
 --- @Note 核心初始化逻辑
 local _setup_core = function()
   -- 1. Around/Inside textobjects
@@ -36,8 +24,7 @@ local _setup_core = function()
   require('mini.surround').setup()
 
   -- 3. Simple and easy statusline
-  require('mini.statusline').setup(_get_statusline_opts())
-  _enhance_statusline()
+  -- require('mini.statusline').setup(_get_statusline_opts())
 end
 
 --------------------------------------------------------------------------

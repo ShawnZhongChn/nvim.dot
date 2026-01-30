@@ -1,43 +1,42 @@
------
---- @Note: Kanagawa 色彩方案
---- 已修复 overrides 类型错误，并针对 4K 屏幕与 Hyprland 透明背景优化。
----
+--- @Note: GitHub Monochrome 颜色方案 - 极简黑白配置
+-------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
 -- Options Components
 -------------------------------------------------------------------------------
 
---- @Note 获取 Kanagawa 的核心配置
+--- 获取插件基础配置
 --- @return table
 local _get_opts = function()
   return {
-    compile = true,
-    undercurl = true,
-    commentStyle = { italic = false },
-    functionStyle = {},
-    keywordStyle = { italic = false },
-    statementStyle = { bold = true },
-    typeStyle = {},
-    transparent = true, -- 适配 Hyprland 透明度
-    dimInactive = true,
-    terminalColors = true,
-    theme = 'wave', -- 针对大屏优化的深色变体
+    -- 可以在此处添加插件支持的自定义选项
   }
+end
+
+-------------------------------------------------------------------------------
+-- Enhancement Methods
+-------------------------------------------------------------------------------
+
+--- 针对特定 UI 组件的微调
+local _apply_custom_highlights = function()
+  -- 预留位置用于处理与 Lualine 或其他插件的兼容性
 end
 
 -------------------------------------------------------------------------------
 -- Core Logic
 -------------------------------------------------------------------------------
 
---- @Note 初始化色彩方案
+--- 整合与初始化
 --- @param opts table
 local _setup = function(_, opts)
-  local kanagawa = require 'kanagawa'
+  local theme = require 'github-monochrome'
+  theme.setup(opts)
 
-  kanagawa.setup(opts)
+  _apply_custom_highlights()
 
-  -- 正式应用主题变体
-  vim.cmd 'colorscheme kanagawa-wave'
+  -- 设置背景并激活 dark 变体
+  vim.o.background = 'dark'
+  vim.cmd.colorscheme 'github-monochrome-dark'
 end
 
 -------------------------------------------------------------------------------
@@ -45,7 +44,7 @@ end
 -------------------------------------------------------------------------------
 
 return {
-  'rebelot/kanagawa.nvim',
+  'idr4n/github-monochrome.nvim',
   priority = 1000,
   lazy = false,
   opts = _get_opts(),

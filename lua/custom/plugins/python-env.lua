@@ -49,7 +49,6 @@ end
 ---@Note 只有在需要强制“首次打开即自动寻找 .venv”时保留，否则插件会记忆上次的选择
 ---@return nil
 local function _set_autocmds()
-  -- venv-selector (regexp分支) 会自动记忆你为项目选择的环境
   -- 因此，通常不需要像 swenv 那样写 FileType Autocmd。
   -- 插件初始化时会自动尝试加载缓存的环境。
 end

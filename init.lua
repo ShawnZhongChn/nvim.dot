@@ -53,6 +53,9 @@ end
 
 --- 主初始化流程
 local function _init()
+  -- 0. 加载全局工具
+  require 'globals'
+
   -- 1. 加载核心配置 (确保 mapleader 在 Lazy 启动前设置)
   _load_core_config()
 

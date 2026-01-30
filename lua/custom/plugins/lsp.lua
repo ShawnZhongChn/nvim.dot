@@ -1,69 +1,9 @@
 --- @Note Main LSP Configuration (nvim-lspconfig)
---- 集成了 Mason, Blink.cmp, Lazydev 以及自定义的 Python 增强和 UI 美化
--------------------------------------------------------------------------------
+--- 集成了 Mason, Blink.cmp, Lazydev -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
 -- Options Components
 -------------------------------------------------------------------------------
-
---- @return function
---- @Note 定义 Python 项目的根目录检测逻辑 (优先级：配置文件 > Git > 当前目录)
-local _get_python_root = function()
-  local util = require 'lspconfig.util'
-  return util.root_pattern('pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', 'Pipfile', '.git')
-end
-
---- @return function
---- @Note 定义 lua 项目的根目录检测逻辑 (优先级：配置文件 > Git > 当前目录)
-local _get_lua_root = function()
-  local util = require 'lspconfig.util'
-  return util.root_pattern 'init.lua'
-end
-
---- @return table
---- @Note 定义需要安装的 LSP 服务器及其特定设置
-local _get_servers = function()
-  local python_root = _get_python_root()
-  local lua_root = _get_lua_root()
-
-  return {
-    -- Lua 配置
-    lua_ls = {
-      root_dir = lua_root,
-      settings = {
-        Lua = {
-          completion = { callSnippet = 'Replace' },
-        },
-      },
-    },
-
-    -- Python: BasedPyright (负责: 类型检查, 定义跳转, 补全)
-    basedpyright = {
-      root_dir = python_root, -- 显式指定根目录检测
-      settings = {
-        basedpyright = {
-          disableOrganizeImports = true, -- 交给 Ruff 处理
-          analysis = {
-            typeCheckingMode = 'standard', -- 可选: off, basic, standard, strict, all
-            autoSearchPaths = true,
-            useLibraryCodeForTypes = true,
-            diagnosticMode = 'openFilesOnly',
-          },
-        },
-      },
-    },
-
-    -- Python: Ruff (负责: Linting, Formatting, Import 排序)
-    ruff = {
-      root_dir = python_root,
-      init_options = {
-        settings = {
-          args = {}, -- 可在此添加额外的 CLI 参数
-        },
-      },
-    },
-  }
-end
 
 --- @return table
 --- @Note 获取诊断 (Diagnostic) 的显示配置
@@ -86,6 +26,74 @@ local _get_diagnostic_opts = function()
       format = function(diagnostic)
         return diagnostic.message
       end,
+    },
+  }
+end
+
+--- @return function
+--- @Note 定义 Python 项目的根目录检测逻辑
+local _get_python_root = function()
+  local util = require 'lspconfig.util'
+  return util.root_pattern('pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', 'Pipfile', '.git')
+end
+
+--- @return function
+--- @Note 定义 lua 项目的根目录检测逻辑
+local _get_lua_root = function()
+  local util = require 'lspconfig.util'
+  return util.root_pattern 'init.lua'
+end
+
+--- @return table
+--- @Note 定义需要安装的 LSP 服务器及其特定设置
+local _get_servers = function()
+  local python_root = _get_python_root()
+  local lua_root = _get_lua_root()
+
+  return {
+    lua_ls = {
+      root_dir = lua_root,
+      settings = {
+        Lua = {
+          completion = { callSnippet = 'Replace' },
+        },
+      },
+    },
+
+    basedpyright = {
+      root_dir = python_root,
+      settings = {
+        basedpyright = {
+          disableOrganizeImports = true,
+          analysis = {
+            typeCheckingMode = 'standard',
+            autoSearchPaths = true,
+            useLibraryCodeForTypes = true,
+            diagnosticMode = 'openFilesOnly',
+          },
+        },
+      },
+    },
+
+    ruff = {
+      root_dir = python_root,
+      init_options = {
+        settings = {
+          lineLength = 120,
+          targetVersion = 'py311',
+          lint = {
+            enable = true,
+            preview = true,
+            dummyVariableRgx = '^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$',
+            select = { 'E', 'F', 'UP', 'B', 'SIM', 'I' },
+          },
+          format = {
+            quoteStyle = 'double',
+            indentStyle = 'space',
+            skipMagicTrailingComma = false,
+          },
+        },
+      },
     },
   }
 end
@@ -140,7 +148,6 @@ end
 --- @param method string
 --- @param bufnr number
 --- @return boolean
---- @Note 版本兼容性检查
 local _client_supports_method = function(client, method, bufnr)
   if vim.fn.has 'nvim-0.11' == 1 then
     return client:supports_method(method, bufnr)
@@ -150,7 +157,7 @@ local _client_supports_method = function(client, method, bufnr)
 end
 
 --- @param event table
---- @Note 当 LSP 挂载到 Buffer 时执行的操作（快捷键与自动命令）
+--- @Note 当 LSP 挂载到 Buffer 时执行的操作
 local _on_attach = function(event)
   local map = function(keys, func, desc, mode)
     mode = mode or 'n'
@@ -158,9 +165,9 @@ local _on_attach = function(event)
   end
 
   -- 核心导航
+  map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
   map('gd', _lsp_merged_search, '[G]oto [D]efinition & References')
   map('grn', vim.lsp.buf.rename, '[R]e[n]ame')
-  map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
   map('grr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences (Only)')
   map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
   map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
@@ -173,7 +180,6 @@ local _on_attach = function(event)
     return
   end
 
-  -- Python 专属增强：注册 FoldDocstrings 命令
   if vim.tbl_contains({ 'basedpyright', 'ruff' }, client_new.name) then
     vim.api.nvim_buf_create_user_command(event.buf, 'FoldDocstrings', _fold_python_docstrings, { range = true })
     map('zp', '<cmd>FoldDocstrings<CR>', '[P]ython: Fold Docstrings')
@@ -192,17 +198,14 @@ local _on_attach = function(event)
       group = highlight_augroup,
       callback = vim.lsp.buf.clear_references,
     })
-    vim.api.nvim_create_autocmd('LspDetach', {
-      group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
-      callback = function(event2)
-        vim.lsp.buf.clear_references()
-        vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-highlight', buffer = event2.buf }
-      end,
-    })
   end
 
-  -- Inlay Hints 切换
+  -- Inlay Hints 配置
   if _client_supports_method(client_new, vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
+    -- 1. 默认开启 Hint (针对当前 buffer)
+    vim.lsp.inlay_hint.enable(true, { bufnr = event.buf })
+
+    -- 2. 保留切换快捷键，方便临时关闭
     map('<leader>th', function()
       vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
     end, '[T]oggle Inlay [H]ints')
