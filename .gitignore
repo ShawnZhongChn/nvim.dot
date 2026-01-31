@@ -5,3 +5,13 @@ nvim
 
 spell/
 lazy-lock.json
+
+# Remote ignores
+tt.*
+.tests
+doc/tags
+debug
+.repro
+foo.*
+*.log
+data
