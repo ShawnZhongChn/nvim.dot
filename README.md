@@ -3,6 +3,7 @@
 > **极简黑白美学 (Minimalist Monochrome) Neovim 配置**
 
 基于 [kickstart.nvim](https://github.com/nvim-lua/kickstart.nvim) 构建，专注于**高性能**与**视觉纯净**。本配置深度优化了 Python 与 Lua 开发体验，并集成了一套完全自定义的响应式状态栏。
+<img width="3008" height="1692" alt="image" src="https://github.com/user-attachments/assets/64afafcb-c4a6-45da-aff8-3c19fa95b8f3" />
 
 ## ✨ 核心特性 (Features)
 
