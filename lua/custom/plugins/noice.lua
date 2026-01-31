@@ -59,15 +59,19 @@ end
 -------------------------------------------------------------------------------
 -- Core Logic
 -------------------------------------------------------------------------------
-
 local _setup_noice = function()
   require('noice').setup {
+    notify = {
+      enabled = false,
+      view = 'notify',
+    },
+
     -- 核心：重定向标准的命令行和输入
     cmdline = { enabled = true, view = 'cmdline_popup' },
     messages = { enabled = true, view = 'notify' },
     popupmenu = { enabled = true, view = 'popupmenu' },
 
-    -- LSP 增强：将 Hover, Signature 转换成 Noice 风格
+    -- LSP 增强
     lsp = {
       override = {
         ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
@@ -79,22 +83,20 @@ local _setup_noice = function()
     },
 
     -- 针对 120Hz 的动画流畅度调整
-    -- Noice 的动画由 nvim-notify 配合，或者自带的帧数逻辑控制
     views = _get_view_configs(),
     routes = _get_routes(),
 
     -- 预设功能
     presets = {
-      bottom_search = false, -- 搜索栏在底部还是弹出 (false 为弹出)
-      command_palette = true, -- 将命令行放在屏幕中间
-      long_message_to_split = true, -- 长消息自动进入分屏
-      inc_rename = false, -- 配合 IncRename 插件
+      bottom_search = false,
+      command_palette = true,
+      long_message_to_split = true,
+      inc_rename = false,
     },
   }
 
   _setup_keymaps()
 end
-
 -------------------------------------------------------------------------------
 -- Plugin Spec
 -------------------------------------------------------------------------------

@@ -25,7 +25,6 @@ end
 --- @Note: 增强型 LazyGit 配置
 local _setup_keymaps = function()
   return {
-    -- 直接写按键即可，which-key 会根据 <leader>l 自动把它放进 [L]azyGit 组
     { '<leader>lg', '<cmd>LazyGit<cr>', desc = 'LazyGit (Float)' },
     { '<leader>lc', '<cmd>LazyGitConfig<cr>', desc = 'LazyGit Config' },
     { '<leader>lf', '<cmd>LazyGitCurrentFile<cr>', desc = 'LazyGit Current File' },

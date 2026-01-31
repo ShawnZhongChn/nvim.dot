@@ -1,12 +1,13 @@
 --- @Note Main LSP Configuration (nvim-lspconfig)
---- 集成了 Mason, Blink.cmp, Lazydev -------------------------------------------------------------------------------
+--- 遵循模块化布局，集成了 Mason, Blink.cmp, Lazydev 及 Python 深度增强。
+--- @url: https://github.com/neovim/nvim-lspconfig
 
 -------------------------------------------------------------------------------
--- Options Components
+-- [Options Components]
 -------------------------------------------------------------------------------
 
---- @return table
 --- @Note 获取诊断 (Diagnostic) 的显示配置
+--- @return table
 local _get_diagnostic_opts = function()
   return {
     severity_sort = true,
@@ -30,38 +31,33 @@ local _get_diagnostic_opts = function()
   }
 end
 
---- @return function
---- @Note 定义 Python 项目的根目录检测逻辑
-local _get_python_root = function()
-  local util = require 'lspconfig.util'
-  return util.root_pattern('pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', 'Pipfile', '.git')
-end
-
---- @return function
---- @Note 定义 lua 项目的根目录检测逻辑
-local _get_lua_root = function()
-  local util = require 'lspconfig.util'
-  return util.root_pattern 'init.lua'
-end
-
+--- @Note 定义各语言项目的根目录检测逻辑
 --- @return table
---- @Note 定义需要安装的 LSP 服务器及其特定设置
-local _get_servers = function()
-  local python_root = _get_python_root()
-  local lua_root = _get_lua_root()
-
+local _get_roots = function()
+  local util = require 'lspconfig.util'
   return {
+    python = util.root_pattern('pyproject.toml', 'setup.py', 'requirements.txt', '.git'),
+    lua = util.root_pattern('init.lua', '.stylua.toml'),
+    markdown = util.root_pattern('.marksman.toml', '.git'),
+  }
+end
+
+--- @Note 定义需要安装的 LSP 服务器及其特定设置
+--- @return table
+local _get_servers = function()
+  local roots = _get_roots()
+  return {
+    -- Lua: 配合 lazydev.nvim 获得极佳的插件开发体验
     lua_ls = {
-      root_dir = lua_root,
+      root_dir = roots.lua,
       settings = {
-        Lua = {
-          completion = { callSnippet = 'Replace' },
-        },
+        Lua = { completion = { callSnippet = 'Replace' } },
       },
     },
 
+    -- Python: 类型检查引擎
     basedpyright = {
-      root_dir = python_root,
+      root_dir = roots.python,
       settings = {
         basedpyright = {
           disableOrganizeImports = true,
@@ -75,31 +71,24 @@ local _get_servers = function()
       },
     },
 
+    -- Python: 极速 Linter & Formatter (LSP 模式)
     ruff = {
-      root_dir = python_root,
+      root_dir = roots.python,
       init_options = {
         settings = {
           lineLength = 120,
-          targetVersion = 'py311',
-          lint = {
-            enable = true,
-            preview = true,
-            dummyVariableRgx = '^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$',
-            select = { 'E', 'F', 'UP', 'B', 'SIM', 'I' },
-          },
-          format = {
-            quoteStyle = 'double',
-            indentStyle = 'space',
-            skipMagicTrailingComma = false,
-          },
+          lint = { enable = true, preview = true },
         },
       },
     },
+
+    -- Markdown: 文档导航与补全
+    marksman = { root_dir = roots.markdown },
   }
 end
 
 -------------------------------------------------------------------------------
--- Enhancement Methods
+-- [Enhancement Methods]
 -------------------------------------------------------------------------------
 
 --- @Note 核心增强：合并定义(gd)与引用(grr)到一个列表展示
@@ -112,8 +101,8 @@ local _lsp_merged_search = function()
   }
 end
 
---- @param args table
 --- @Note Python 专用：利用 Treesitter 智能折叠 Docstrings
+--- @param args table
 local _fold_python_docstrings = function(args)
   local query = vim.treesitter.query.parse(
     'python',
@@ -123,7 +112,6 @@ local _fold_python_docstrings = function(args)
     (class_definition body: (block (expression_statement (string) @docstring)))
   ]]
   )
-
   local start_line = args.range >= 2 and args.line1 or nil
   local end_line = args.range >= 2 and args.line2 or nil
   local parser = vim.treesitter.get_parser(0, 'python')
@@ -144,10 +132,7 @@ local _fold_python_docstrings = function(args)
   end
 end
 
---- @param client table
---- @param method string
---- @param bufnr number
---- @return boolean
+--- @Note 判断 LSP Client 是否支持特定方法 (兼容性处理)
 local _client_supports_method = function(client, method, bufnr)
   if vim.fn.has 'nvim-0.11' == 1 then
     return client:supports_method(method, bufnr)
@@ -156,8 +141,8 @@ local _client_supports_method = function(client, method, bufnr)
   end
 end
 
+--- @Note 当 LSP 挂载到 Buffer 时执行的操作 (Keymaps, Autocmds)
 --- @param event table
---- @Note 当 LSP 挂载到 Buffer 时执行的操作
 local _on_attach = function(event)
   local map = function(keys, func, desc, mode)
     mode = mode or 'n'
@@ -168,44 +153,40 @@ local _on_attach = function(event)
   map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
   map('gd', _lsp_merged_search, '[G]oto [D]efinition & References')
   map('grn', vim.lsp.buf.rename, '[R]e[n]ame')
-  map('grr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences (Only)')
+  map('grr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
   map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
   map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
   map('gO', require('telescope.builtin').lsp_document_symbols, 'Open Document Symbols')
-  map('gW', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Open Workspace Symbols')
-  map('grt', require('telescope.builtin').lsp_type_definitions, '[G]oto [T]ype Definition')
 
-  local client_new = vim.lsp.get_client_by_id(event.data.client_id)
-  if not client_new then
+  local client = vim.lsp.get_client_by_id(event.data.client_id)
+  if not client then
     return
   end
 
-  if vim.tbl_contains({ 'basedpyright', 'ruff' }, client_new.name) then
+  -- Python 专用增强
+  if vim.tbl_contains({ 'basedpyright', 'ruff' }, client.name) then
     vim.api.nvim_buf_create_user_command(event.buf, 'FoldDocstrings', _fold_python_docstrings, { range = true })
     map('zp', '<cmd>FoldDocstrings<CR>', '[P]ython: Fold Docstrings')
   end
 
   -- 自动高亮 (CursorHold)
-  if _client_supports_method(client_new, vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
-    local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
+  if _client_supports_method(client, vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
+    local highlight_group = vim.api.nvim_create_augroup('lsp-highlight-' .. event.buf, { clear = true })
     vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
       buffer = event.buf,
-      group = highlight_augroup,
+      group = highlight_group,
       callback = vim.lsp.buf.document_highlight,
     })
     vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
       buffer = event.buf,
-      group = highlight_augroup,
+      group = highlight_group,
       callback = vim.lsp.buf.clear_references,
     })
   end
 
-  -- Inlay Hints 配置
-  if _client_supports_method(client_new, vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
-    -- 1. 默认开启 Hint (针对当前 buffer)
+  -- Inlay Hints
+  if _client_supports_method(client, vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
     vim.lsp.inlay_hint.enable(true, { bufnr = event.buf })
-
-    -- 2. 保留切换快捷键，方便临时关闭
     map('<leader>th', function()
       vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
     end, '[T]oggle Inlay [H]ints')
@@ -213,62 +194,70 @@ local _on_attach = function(event)
 end
 
 -------------------------------------------------------------------------------
--- Core Logic
+-- [Core Logic]
 -------------------------------------------------------------------------------
 
 --- @Note 整合与初始化
 local _setup_core = function()
-  -- 1. 全局 UI 设置
+  -- 1. UI 装饰
   vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = 'rounded' })
   vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signatureHelp, { border = 'rounded' })
 
-  -- 2. 注册 LspAttach 监听
+  -- 2. 诊断配置应用
+  vim.diagnostic.config(_get_diagnostic_opts())
+
+  -- 3. 注册挂载事件
   vim.api.nvim_create_autocmd('LspAttach', {
-    group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
+    group = vim.api.nvim_create_augroup('lsp-attach-core', { clear = true }),
     callback = _on_attach,
   })
 
-  -- 3. 应用诊断样式
-  vim.diagnostic.config(_get_diagnostic_opts())
-
-  -- 4. 准备 Capabilities 与 Servers
-  local capabilities = require('blink.cmp').get_lsp_capabilities()
+  -- 4. Mason 工具全自动安装
   local servers = _get_servers()
   local ensure_installed = vim.tbl_keys(servers or {})
-  vim.list_extend(ensure_installed, { 'stylua' })
+  -- 手动补充非 LSP 工具 (Formatter & Linter)
+  vim.list_extend(ensure_installed, {
+    'stylua',
+    'markdownlint-cli2', -- 解决 ENOENT 报错的核心
+    'prettier', -- 配合 conform.nvim
+  })
 
-  require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+  require('mason-tool-installer').setup {
+    ensure_installed = ensure_installed,
+    auto_update = true,
+    run_on_start = true,
+  }
 
-  -- 5. 初始化 Mason-LSPConfig
+  -- 5. 通过 Mason-LSPConfig 桥接驱动 lspconfig
+  local capabilities = require('blink.cmp').get_lsp_capabilities()
   require('mason-lspconfig').setup {
     handlers = {
       function(server_name)
-        local server = servers[server_name]
-        if server then
-          server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+        local server = servers[server_name] or {}
+        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
 
-          if server_name == 'basedpyright' then
-            server.capabilities.documentFormattingProvider = false
-            server.capabilities.documentRangeFormattingProvider = false
-          end
-
-          require('lspconfig')[server_name].setup(server)
+        -- 避免 Basedpyright 抢夺格式化权
+        if server_name == 'basedpyright' then
+          server.capabilities.documentFormattingProvider = false
+          server.capabilities.documentRangeFormattingProvider = false
         end
+
+        require('lspconfig')[server_name].setup(server)
       end,
     },
   }
 end
 
 -------------------------------------------------------------------------------
--- Plugin Spec
+-- [Plugin Spec]
 -------------------------------------------------------------------------------
 
 return {
   'neovim/nvim-lspconfig',
   dependencies = {
     { 'folke/lazydev.nvim', ft = 'lua', opts = {} },
-    { 'mason-org/mason.nvim', opts = {} },
-    'mason-org/mason-lspconfig.nvim',
+    { 'williamboman/mason.nvim', opts = {} },
+    'williamboman/mason-lspconfig.nvim',
     'WhoIsSethDaniel/mason-tool-installer.nvim',
     { 'j-hui/fidget.nvim', opts = {} },
     'saghen/blink.cmp',

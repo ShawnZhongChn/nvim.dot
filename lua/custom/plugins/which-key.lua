@@ -43,7 +43,6 @@ local _get_base_opts = function()
 end
 
 --- @Note 定义全局组名映射 (Spec)
---- 显式定义组名可以防止出现 "+N keymaps" 字样
 --- @return table
 local _get_wk_spec = function()
   return {
@@ -58,6 +57,7 @@ local _get_wk_spec = function()
     { '<leader>f', group = '[F]iles / Oil', icon = '󰉓 ' },
     { '<leader>l', group = '[L]azyGit', icon = '󰊢 ' },
     { '<leader>q', proxy = '<c-w>', group = '[W]indows' },
+    { '<leader>fs', group = '[S]cratch Pad', icon = '󰄱 ' },
   }
 end
 
