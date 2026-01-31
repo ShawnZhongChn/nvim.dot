@@ -163,6 +163,17 @@ local _on_attach = function(event)
     return
   end
 
+  -- [Lua_ls Hotfix]
+  -- 强制在内存中补全 'vim' 全局变量配置，并主动通知服务器，绕过配置合并失败问题
+  if client.name == 'lua_ls' then
+    client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua or {}, {
+      diagnostics = {
+        globals = { 'vim' },
+      },
+    })
+    client.notify('workspace/didChangeConfiguration', { settings = client.config.settings })
+  end
+
   -- Python 专用增强
   if vim.tbl_contains({ 'basedpyright', 'ruff' }, client.name) then
     vim.api.nvim_buf_create_user_command(event.buf, 'FoldDocstrings', _fold_python_docstrings, { range = true })

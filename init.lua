@@ -30,7 +30,7 @@ end
 --- @return string lazypath 插件管理器路径
 local function _ensure_lazy_installed()
   local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
-  if not (vim.uv or vim.loop).fs_stat(lazypath) then
+  if not vim.uv.fs_stat(lazypath) then
     local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
     local out = vim.fn.system {
       'git',
@@ -59,7 +59,11 @@ local function _init()
   -- 1. 加载核心配置 (确保 mapleader 在 Lazy 启动前设置)
   _load_core_config()
 
-  -- 2. 注入插件管理器路径
+  -- 2. 启动 Neovim RPC 服务 (用于 MCP Server)
+  -- 始终尝试启动固定路径的 Pipe，方便外部工具连接
+  pcall(vim.fn.serverstart, '/tmp/nvim')
+
+  -- 3. 注入插件管理器路径
   local lazypath = _ensure_lazy_installed()
   vim.opt.rtp:prepend(lazypath)
 
