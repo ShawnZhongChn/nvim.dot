@@ -62,13 +62,13 @@ end
 local _setup_noice = function()
   require('noice').setup {
     notify = {
-      enabled = false,
-      view = 'notify',
+      enabled = true,
+      view = 'mini',
     },
 
     -- 核心：重定向标准的命令行和输入
     cmdline = { enabled = true, view = 'cmdline_popup' },
-    messages = { enabled = true, view = 'notify' },
+    messages = { enabled = true, view = 'mini' },
     popupmenu = { enabled = true, view = 'popupmenu' },
 
     -- LSP 增强
@@ -88,10 +88,11 @@ local _setup_noice = function()
 
     -- 预设功能
     presets = {
-      bottom_search = false,
+      bottom_search = true,
       command_palette = true,
       long_message_to_split = true,
-      inc_rename = false,
+      inc_rename = true,
+      lsp_doc_border = true,
     },
   }
 
@@ -107,15 +108,6 @@ return {
   priority = 1000,
   dependencies = {
     'MunifTanjim/nui.nvim',
-    {
-      'rcarriga/nvim-notify',
-      opts = {
-        fps = 120, -- 强制开启 120 FPS 渲染
-        render = 'compact',
-        stages = 'fade_in_slide_out',
-        background_colour = '#000000',
-      },
-    },
   },
   config = _setup_noice,
 }
