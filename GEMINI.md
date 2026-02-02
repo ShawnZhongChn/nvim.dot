@@ -2,6 +2,8 @@
 
 This directory contains a highly customized, modular Neovim configuration focused on a minimalist monochrome aesthetic and deep optimization for Python and Lua development.
 
+**Use nvim mcp server to get or test you need**
+
 ## 🚀 Project Overview
 
 - **Core Philosophy:** Minimalist Monochrome (Black & White), high performance, and modular design.
