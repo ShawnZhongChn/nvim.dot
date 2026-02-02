@@ -50,6 +50,7 @@ local _get_wk_spec = function()
     { '<leader>d', group = '[D]ocument' },
     { '<leader>n', group = '[N]otices' },
     { '<leader>r', group = '[R]ename' },
+    { '<leader>o', group = '[O]bsidian' },
     { '<leader>s', group = '[S]earch' },
     { '<leader>w', group = '[W]orkspace' },
     { '<leader>t', group = '[T]oggle' },

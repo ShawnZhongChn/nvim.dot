@@ -7,7 +7,7 @@
 --- 预设草稿类型列表
 --- @return table
 local function _get_fts()
-  return { 'lua', 'python', 'markdown', 'json', 'go', 'sql', 'sh' }
+  return { 'lua', 'py', 'md', 'json', 'go', 'sql', 'sh' }
 end
 
 --------------------------------------------------------------------------------
