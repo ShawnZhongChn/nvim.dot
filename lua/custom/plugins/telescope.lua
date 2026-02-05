@@ -99,6 +99,10 @@ local _set_keymaps = function(builtin)
   vim.keymap.set('n', '<leader>sc', function()
     builtin.find_files { cwd = vim.fn.stdpath 'config' }
   end, { desc = '[S]earch [C]onfig files' })
+
+  -- Code Diagnostics
+  vim.keymap.set('n', '<leader>cdd', function() builtin.diagnostics({ bufnr = 0 }) end, { desc = '[C]ode [D]iagnostic [D]ocument' })
+  vim.keymap.set('n', '<leader>cdp', builtin.diagnostics, { desc = '[C]ode [D]iagnostic [P]roject' })
 end
 
 --------------------------------------------------------------------------

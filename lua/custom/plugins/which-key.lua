@@ -47,6 +47,7 @@ end
 local _get_wk_spec = function()
   return {
     { '<leader>c', group = '[C]ode', mode = { 'n', 'x' } },
+    { '<leader>cd', group = '[D]iagnostic' },
     { '<leader>d', group = '[D]ocument' },
     { '<leader>n', group = '[N]otices' },
     { '<leader>r', group = '[R]ename' },
