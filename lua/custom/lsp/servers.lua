@@ -36,8 +36,20 @@ function M.get_servers()
           analysis = {
             typeCheckingMode = 'standard',
             autoSearchPaths = true,
+            autoImportCompletions = true,
             useLibraryCodeForTypes = true,
-            diagnosticMode = 'openFilesOnly',
+            diagnosticMode = 'workspace',
+            diagnosticSeverityOverrides = {
+              reportUnusedCallResult = 'none',
+            },
+          },
+        },
+        -- Compatibility fallback
+        python = {
+          analysis = {
+            diagnosticSeverityOverrides = {
+              reportUnusedCallResult = 'none',
+            },
           },
         },
       },
