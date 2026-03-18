@@ -15,10 +15,16 @@ local _get_obsidian_opts = function()
     workspaces = {
       {
         name = 'personal',
-        path = '~/Documents/MyNotes', -- [TODO]: 修改为你的实际路径
+        path = '/Users/shawn/Documents/Study/MyNotes/',
       },
       -- 添加 Workspace
     },
+
+    -- Where to put new notes.
+    new_notes_location = 'vault_root',
+
+    -- The specific subdirectory for notes.
+    notes_subdir = '', -- [Note]: 设置为 "" 则直接放在 MyNotes 根目录下
 
     disable_frontmatter = true,
 
@@ -201,7 +207,20 @@ return {
   lazy = true,
   -- 使用 keys 触发加载，确保全局可用
   keys = {
-    { '<leader>on', '<cmd>ObsidianNew<CR>', desc = 'Obsidian: New Note' },
+    {
+      '<leader>on',
+      function()
+        local vault_path = '/Users/shawn/Documents/Study/MyNotes/'
+        -- 1. 切换 Neovim 的工作目录到 Vault 根目录
+        -- 这样输入框的路径补全就会基于此目录
+        vim.fn.chdir(vault_path)
+        -- 2. 确保插件识别到该工作区
+        vim.cmd 'ObsidianWorkspace personal'
+        -- 3. 触发新建笔记
+        vim.cmd 'ObsidianNew'
+      end,
+      desc = 'Obsidian: New Note (at Vault Root)',
+    },
     { '<leader>oo', '<cmd>ObsidianOpen<CR>', desc = 'Obsidian: Open in App' },
     { '<leader>od', '<cmd>ObsidianToday<CR>', desc = 'Obsidian: Daily Note' },
     { '<leader>oy', '<cmd>ObsidianYesterday<CR>', desc = 'Obsidian: Yesterday Note' },

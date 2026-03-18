@@ -32,6 +32,7 @@ local _is_skip_folder = function(name)
 end
 
 --- @Note: 获取 Oil 的主要配置表
+--- @return table
 local _get_opts = function()
   return {
     columns = { 'icon' },
@@ -51,6 +52,38 @@ local _get_opts = function()
       ['L'] = 'actions.select',
       ['H'] = 'actions.parent',
       ['q'] = 'actions.close',
+
+      -- @Note: 仅在 Oil 内有效 - 复制相对路径
+      ['gy'] = {
+        desc = 'Copy relative path',
+        callback = function()
+          local oil = require 'oil'
+          local entry = oil.get_cursor_entry()
+          local dir = oil.get_current_dir()
+          if not entry or not dir then
+            return
+          end
+          local rel_path = vim.fn.fnamemodify(dir .. entry.name, ':.')
+          vim.fn.setreg('+', rel_path)
+          vim.notify('Copied relative path: ' .. rel_path)
+        end,
+      },
+
+      -- @Note: 仅在 Oil 内有效 - 复制绝对路径
+      ['gY'] = {
+        desc = 'Copy absolute path',
+        callback = function()
+          local oil = require 'oil'
+          local entry = oil.get_cursor_entry()
+          local dir = oil.get_current_dir()
+          if not entry or not dir then
+            return
+          end
+          local abs_path = dir .. entry.name
+          vim.fn.setreg('+', abs_path)
+          vim.notify('Copied absolute path: ' .. abs_path)
+        end,
+      },
     },
     win_options = {
       winbar = '%{v:lua._oil_winbar_provider()}',
@@ -77,22 +110,17 @@ end
 --- @Note: 配置进入 Oil 时自动打开预览窗口
 --- @param oil table Oil 模块实例
 local _set_autocmds = function(oil)
-  -- [FIX] 改用 BufWinEnter 确保每次打开窗口都触发
   vim.api.nvim_create_autocmd('BufWinEnter', {
     pattern = '*',
     callback = function(args)
-      -- 检查当前 Buffer 是否是 Oil 类型
       if vim.bo[args.buf].filetype == 'oil' then
-        -- 延迟执行，确保 UI 渲染完毕
         vim.defer_fn(function()
-          -- 双重检查：确保当前窗口依然停留在 Oil buffer 中
           if vim.api.nvim_get_current_buf() == args.buf then
-            -- 确保选中了条目才打开
             if oil.get_cursor_entry() then
               oil.open_preview()
             end
           end
-        end, 50) -- 50ms 延迟
+        end, 50)
       end
     end,
     group = vim.api.nvim_create_augroup('OilAutoPreview', { clear = true }),
