@@ -20,51 +20,19 @@ function M.get_servers()
   local roots = _get_roots()
   return {
     -- Lua: 配合 lazydev.nvim 获得极佳的插件开发体验
-    lua_ls = {
+    lua_ls = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.lua_ls', {
       root_dir = roots.lua,
-      settings = {
-        Lua = { completion = { callSnippet = 'Replace' } },
-      },
-    },
+    }),
 
     -- Python: 类型检查引擎
-    basedpyright = {
+    basedpyright = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.basedpyright', {
       root_dir = roots.python,
-      settings = {
-        basedpyright = {
-          disableOrganizeImports = true,
-          analysis = {
-            typeCheckingMode = 'standard',
-            autoSearchPaths = true,
-            autoImportCompletions = true,
-            useLibraryCodeForTypes = true,
-            diagnosticMode = 'workspace',
-            diagnosticSeverityOverrides = {
-              reportUnusedCallResult = 'none',
-            },
-          },
-        },
-        -- Compatibility fallback
-        python = {
-          analysis = {
-            diagnosticSeverityOverrides = {
-              reportUnusedCallResult = 'none',
-            },
-          },
-        },
-      },
-    },
+    }),
 
     -- Python: 极速 Linter & Formatter (LSP 模式)
-    ruff = {
+    ruff = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.ruff', {
       root_dir = roots.python,
-      init_options = {
-        settings = {
-          lineLength = 120,
-          lint = { enable = true, preview = true },
-        },
-      },
-    },
+    }),
 
     -- Markdown: 文档导航与补全
     marksman = { root_dir = roots.markdown },

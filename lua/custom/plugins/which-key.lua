@@ -57,7 +57,7 @@ local _get_wk_spec = function()
     { '<leader>t', group = '[T]oggle' },
     { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
     { '<leader>f', group = '[F]iles / Oil', icon = '󰉓 ' },
-    { '<leader>l', group = '[L]azyGit', icon = '󰊢 ' },
+    { '<leader>l', group = '[L]azy', icon = '󰊢 ' },
     { '<leader>q', proxy = '<c-w>', group = '[W]indows' },
     { '<leader>fs', group = '[S]cratch Pad', icon = '󰄱 ' },
   }
