@@ -11,6 +11,7 @@ local _get_roots = function()
     python = util.root_pattern('pyproject.toml', 'setup.py', 'requirements.txt', '.git'),
     lua = util.root_pattern('init.lua', '.stylua.toml'),
     markdown = util.root_pattern('.marksman.toml', '.git'),
+    yaml = util.root_pattern('.git'),
   }
 end
 
@@ -19,6 +20,11 @@ end
 function M.get_servers()
   local roots = _get_roots()
   return {
+    -- YAML: 通过 SchemaStore 提供极致的 Kubernetes/Helm 补全
+    yamlls = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.yamlls', {
+      root_dir = roots.yaml,
+    }),
+
     -- Lua: 配合 lazydev.nvim 获得极佳的插件开发体验
     lua_ls = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.lua_ls', {
       root_dir = roots.lua,

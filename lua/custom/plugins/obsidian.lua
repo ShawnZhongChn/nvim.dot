@@ -26,8 +26,6 @@ local _get_obsidian_opts = function()
     -- The specific subdirectory for notes.
     notes_subdir = '', -- [Note]: 设置为 "" 则直接放在 MyNotes 根目录下
 
-    disable_frontmatter = true,
-
     -- 2. 每日笔记配置 (Daily Notes)
     daily_notes = {
       folder = 'dailies',
@@ -54,12 +52,6 @@ local _get_obsidian_opts = function()
     ui = {
       enable = true,
       update_debounce = 200,
-      checkboxes = {
-        [' '] = { char = '󰄱', hl_group = 'ObsidianTodo' },
-        ['x'] = { char = '', hl_group = 'ObsidianDone' },
-        ['>'] = { char = '', hl_group = 'ObsidianRightArrow' },
-        ['~'] = { char = '󰰱', hl_group = 'ObsidianTilde' },
-      },
       bullets = { char = '•', hl_group = 'ObsidianBullet' },
       external_link_icon = { char = '', hl_group = 'ObsidianExtLink' },
       reference_text = { hl_group = 'ObsidianRefText' },
@@ -78,9 +70,16 @@ local _get_obsidian_opts = function()
       },
     },
 
+    checkboxes = {
+      [' '] = { char = '󰄱', hl_group = 'ObsidianTodo' },
+      ['x'] = { char = '', hl_group = 'ObsidianDone' },
+      ['>'] = { char = '', hl_group = 'ObsidianRightArrow' },
+      ['~'] = { char = '󰰱', hl_group = 'ObsidianTilde' },
+    },
+
     -- 5. 附件与图片 (Attachments)
     attachments = {
-      img_folder = 'assets/imgs', -- 图片存放目录
+      folder = 'assets/imgs', -- 图片存放目录
       img_text_func = function(client, path)
         path = client:vault_relative_path(path) or path
         return string.format('![%s](%s)', path.name, path)
@@ -88,24 +87,27 @@ local _get_obsidian_opts = function()
     },
 
     -- 6. Frontmatter 智能生成 (Zettelkasten ID)
-    --- @param note table
-    note_frontmatter_func = function(note)
-      -- 如果已有 frontmatter，保留大部分字段
-      if note.metadata ~= nil and not vim.tbl_isempty(note.metadata) then
-        return note.metadata
-      end
+    frontmatter = {
+      enabled = true,
+      --- @param note table
+      func = function(note)
+        -- 如果已有 frontmatter，保留大部分字段
+        if note.metadata ~= nil and not vim.tbl_isempty(note.metadata) then
+          return note.metadata
+        end
 
-      -- 生成新笔记的元数据
-      local out = { id = note.id, aliases = note.aliases, tags = note.tags }
+        -- 生成新笔记的元数据
+        local out = { id = note.id, aliases = note.aliases, tags = note.tags }
 
-      -- 如果 ID 不是日期格式，添加 created/updated 时间戳
-      if note.title and not note.title:match '%d%d%d%d%-%d%d%-%d%d' then
-        out.created = os.date '%Y-%m-%d %H:%M'
-        out.updated = os.date '%Y-%m-%d %H:%M'
-      end
+        -- 如果 ID 不是日期格式，添加 created/updated 时间戳
+        if note.title and not note.title:match '%d%d%d%d%-%d%d%-%d%d' then
+          out.created = os.date '%Y-%m-%d %H:%M'
+          out.updated = os.date '%Y-%m-%d %H:%M'
+        end
 
-      return out
-    end,
+        return out
+      end,
+    },
 
     -- 7. 笔记 ID 生成规则
     note_id_func = function(title)
@@ -122,8 +124,6 @@ local _get_obsidian_opts = function()
         return tostring(os.time()) .. '-' .. suffix
       end
     end,
-
-    mappings = {},
   }
 end
 

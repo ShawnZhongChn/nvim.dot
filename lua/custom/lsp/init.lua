@@ -49,6 +49,7 @@ function M.setup()
     'stylua',
     'markdownlint-cli2', -- 解决 ENOENT 报错的核心
     'prettier', -- 配合 conform.nvim
+    'yaml-language-server',
   })
 
   require('mason-tool-installer').setup {
