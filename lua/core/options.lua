@@ -4,8 +4,14 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
--- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+-- Auto-detect Nerd Font based on terminal/emulator
+vim.g.have_nerd_font = (
+  vim.fn.has('gui_running') == 1
+  or vim.env.TERM_PROGRAM == 'Apple_Terminal'
+  or vim.env.TERM_PROGRAM == 'iTerm.app'
+  or vim.fn.executable('nvim-qt') == 1
+  or (vim.env.TERM and vim.env.TERM:match 'nerd')
+)
 
 -- [[ Setting options ]]
 -- See `:help vim.o`

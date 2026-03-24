@@ -14,7 +14,7 @@
   - 响应式设计：小窗口自动隐藏 Git/路径信息。
   - 独家滚动条组件 (Visual Scrollbar)。
 - **通知系统**: 集成 `Noice.nvim`，提供优雅的消息提示与命令行弹窗。
-- **文件树**: `Oil.nvim` 提供如编辑缓冲区般的文件管理体验。
+- **文件树**: `Yazi.nvim` 提供极速的异步文件管理体验。
 
 ### 🐍 Python 深度增强
 - **LSP**: 使用 **Basedpyright** 替代 Pyright，提供更严格的类型检查。
@@ -87,7 +87,7 @@ nvim
 | `<leader>ff` | Find Files | 查找文件 |
 | `<leader>fw` | Live Grep | 全局文本搜索 |
 | `<leader>lg` | LazyGit | 打开 Git 浮窗 |
-| `<leader>e` | Oil | 打开文件管理器 (当前目录) |
+| `<leader>e` | Yazi | 打开文件管理器 (当前目录) |
 | `<leader>cf` | Format | 格式化当前代码 |
 | `<leader>q` | Quit | 关闭当前窗口 |
 | `gd` | Goto Definition | 跳转定义 (合并引用) |

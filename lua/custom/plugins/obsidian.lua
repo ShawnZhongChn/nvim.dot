@@ -44,7 +44,7 @@ local _get_obsidian_opts = function()
 
     -- 3. 补全集成 (Completion)
     completion = {
-      nvim_cmp = true, -- 如果使用 nvim-cmp
+      nvim_cmp = false, -- 如果使用 nvim-cmp
       min_chars = 2,
     },
 
@@ -213,7 +213,7 @@ return {
         local vault_path = '/Users/shawn/Documents/Study/MyNotes/'
         -- 1. 切换 Neovim 的工作目录到 Vault 根目录
         -- 这样输入框的路径补全就会基于此目录
-        vim.fn.chdir(vault_path)
+        vim.cmd.cd(vault_path)
         -- 2. 确保插件识别到该工作区
         vim.cmd 'ObsidianWorkspace personal'
         -- 3. 触发新建笔记
@@ -236,8 +236,6 @@ return {
     'nvim-telescope/telescope.nvim',
     -- 语法高亮依赖
     'nvim-treesitter/nvim-treesitter',
-    -- 补全依赖
-    'hrsh7th/nvim-cmp',
   },
   opts = _get_obsidian_opts(),
   config = _init_obsidian,

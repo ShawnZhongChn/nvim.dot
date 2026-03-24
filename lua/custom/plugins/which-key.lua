@@ -48,6 +48,10 @@ local _get_wk_spec = function()
   return {
     { '<leader>c', group = '[C]ode', mode = { 'n', 'x' } },
     { '<leader>cd', group = '[D]iagnostic' },
+    { '<leader>cdd', group = 'Document Diagnostics' },
+    { '<leader>cdp', group = 'Project Diagnostics' },
+    { '<leader>cq', group = 'Quickfix List' },
+    { '<leader>cw', group = 'Workspace Diagnostics' },
     { '<leader>d', group = '[D]ocument' },
     { '<leader>n', group = '[N]otices' },
     { '<leader>r', group = '[R]ename' },

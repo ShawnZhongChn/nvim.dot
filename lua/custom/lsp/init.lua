@@ -60,7 +60,7 @@ function M.setup()
 
   -- 5. 通过 Mason-LSPConfig 桥接驱动 lspconfig
   local capabilities = vim.lsp.protocol.make_client_capabilities()
-  capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+  capabilities = vim.tbl_deep_extend('force', capabilities, require('blink.cmp').get_lsp_capabilities())
   require('mason-lspconfig').setup {
     handlers = {
       function(server_name)

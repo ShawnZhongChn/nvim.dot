@@ -50,9 +50,16 @@ local _setup_keymaps = function()
 
   -- 针对你的需求：直接把最后一条消息存入剪贴板
   map('n', '<leader>ny', function()
-    require('noice').redirect(function()
-      print(vim.fn.getreg '"') -- 这里的逻辑可以通过 noice 路由截取
-    end)
+    local last = require('noice').last()
+    if last and last.content then
+      local text = type(last.content) == 'table'
+        and table.concat(vim.tbl_flatten(last.content), '\n')
+        or tostring(last.content)
+      vim.fn.setreg('"', text)
+      vim.notify('Last message yanked')
+    else
+      vim.notify('No message to yank', vim.log.levels.WARN)
+    end
   end, { desc = 'Noice: Yank Last Message' })
 end
 
@@ -76,7 +83,6 @@ local _setup_noice = function()
       override = {
         ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
         ['vim.lsp.util.stylize_markdown'] = true,
-        ['cmp.entry.get_documentation'] = true,
       },
       hover = { enabled = true, silent = true },
       signature = { enabled = true },
