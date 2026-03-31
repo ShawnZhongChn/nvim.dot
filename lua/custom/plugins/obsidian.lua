@@ -1,54 +1,156 @@
----
---- @Note: Obsidian.nvim 高级集成配置
---- @Desc: 集成笔记管理、每日日记、模板系统、智能链接跳转与 Zettelkasten 工作流
----
+local VAULT_PATH = '/Users/shawn/Documents/Study/MyNotes'
+local ROUGH_NOTES_DIR = '1 - Rough Notes'
+local TOPIC_PAGES_DIR = '3 - Tags'
+local DAILY_NOTES_DIR = 'dailies'
+local TEMPLATES_DIR = '4 - Templates'
+local OBSIDIAN_GROUP = 'CustomObsidianVault'
 
---------------------------------------------------------------------------------
--- Options Components
---------------------------------------------------------------------------------
+local _trim = function(value)
+  return value and vim.trim(value) or value
+end
 
---- 生成 Obsidian 核心配置项
---- @return table
+local _fallback_note_id = function()
+  local suffix = ''
+  for _ = 1, 4 do
+    suffix = suffix .. string.char(math.random(65, 90))
+  end
+  return tostring(os.time()) .. '-' .. suffix
+end
+
+local _sanitize_note_id = function(title)
+  title = _trim(title)
+  if title == nil or title == '' then
+    return nil
+  end
+
+  local sanitized = title
+  sanitized = sanitized:gsub('[\\/:*?"<>|]', '-')
+  sanitized = sanitized:gsub('[#%[%]%^]', '')
+  sanitized = sanitized:gsub('%s+', ' ')
+  sanitized = sanitized:gsub('^%s+', ''):gsub('%s+$', '')
+
+  if sanitized == '' or sanitized:match '^%.+$' then
+    return nil
+  end
+
+  return sanitized
+end
+
+local _is_daily_path = function(path)
+  return path ~= nil and path:find('/' .. DAILY_NOTES_DIR .. '/', 1, true) ~= nil
+end
+
+local _ensure_workspace = function()
+  vim.cmd 'ObsidianWorkspace personal'
+end
+
+local _new_from_template = function(template_name, prompt)
+  return function()
+    _ensure_workspace()
+    vim.ui.input({ prompt = prompt }, function(input)
+      local title = _sanitize_note_id(input)
+      if title == nil then
+        return
+      end
+      require('obsidian.actions').new_from_template(title, template_name)
+    end)
+  end
+end
+
+local _touch_updated_field = function(bufnr)
+  if not vim.b[bufnr].obsidian_buffer or not vim.bo[bufnr].modifiable then
+    return
+  end
+
+  local max_lines = math.min(vim.api.nvim_buf_line_count(bufnr), 50)
+  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, max_lines, false)
+  if lines[1] ~= '---' then
+    return
+  end
+
+  local boundary = nil
+  for i = 2, #lines do
+    if lines[i] == '---' then
+      boundary = i
+      break
+    end
+  end
+
+  if boundary == nil then
+    return
+  end
+
+  local updated_value = _is_daily_path(vim.api.nvim_buf_get_name(bufnr)) and os.date '%Y-%m-%d' or os.date '%Y-%m-%d %H:%M'
+  local replacement = 'updated: ' .. updated_value
+
+  for i = 2, boundary - 1 do
+    if lines[i]:match '^updated:%s*' then
+      if lines[i] ~= replacement then
+        vim.api.nvim_buf_set_lines(bufnr, i - 1, i, false, { replacement })
+      end
+      return
+    end
+  end
+
+  vim.api.nvim_buf_set_lines(bufnr, boundary - 1, boundary - 1, false, { replacement })
+end
+
 local _get_obsidian_opts = function()
   return {
-    -- 1. 工作区定义 (支持多 Vault 切换)
     workspaces = {
       {
         name = 'personal',
-        path = '/Users/shawn/Documents/Study/MyNotes/',
+        path = VAULT_PATH,
       },
-      -- 添加 Workspace
     },
 
-    -- Where to put new notes.
-    new_notes_location = 'vault_root',
+    notes_subdir = ROUGH_NOTES_DIR,
+    new_notes_location = 'notes_subdir',
 
-    -- The specific subdirectory for notes.
-    notes_subdir = '', -- [Note]: 设置为 "" 则直接放在 MyNotes 根目录下
+    note = {
+      template = 'new-note.md',
+    },
 
-    -- 2. 每日笔记配置 (Daily Notes)
     daily_notes = {
-      folder = 'dailies',
+      folder = DAILY_NOTES_DIR,
       date_format = '%Y-%m-%d',
       alias_format = '%B %-d, %Y',
-      template = 'daily-template.md', -- 需在 templates 目录创建此文件
+      template = 'daily-template.md',
+      default_tags = {},
+      workdays_only = false,
     },
 
-    -- 2.5 模板配置 (Templates)
     templates = {
-      subdir = '4 - Templates',
-      date_format = '%Y-%m-%d',
-      time_format = '%H:%M',
+      folder = TEMPLATES_DIR,
+      date_format = 'YYYY-MM-DD',
+      time_format = 'HH:mm',
       substitutions = {},
+      customizations = {
+        ['new-note'] = {
+          notes_subdir = ROUGH_NOTES_DIR,
+        },
+        topic = {
+          notes_subdir = TOPIC_PAGES_DIR,
+        },
+      },
     },
 
-    -- 3. 补全集成 (Completion)
+    link = {
+      style = 'wiki',
+      format = 'shortest',
+    },
+
     completion = {
-      nvim_cmp = false, -- 如果使用 nvim-cmp
       min_chars = 2,
+      create_new = true,
     },
 
-    -- 4. 界面美化 (UI)
+    search = {
+      sort_by = 'modified',
+      sort_reversed = true,
+      max_lines = 2000,
+    },
+
     ui = {
       enable = true,
       update_debounce = 200,
@@ -77,65 +179,41 @@ local _get_obsidian_opts = function()
       ['~'] = { char = '󰰱', hl_group = 'ObsidianTilde' },
     },
 
-    -- 5. 附件与图片 (Attachments)
     attachments = {
-      folder = 'assets/imgs', -- 图片存放目录
+      folder = 'assets/imgs',
       img_text_func = function(client, path)
         path = client:vault_relative_path(path) or path
         return string.format('![%s](%s)', path.name, path)
       end,
     },
 
-    -- 6. Frontmatter 智能生成 (Zettelkasten ID)
     frontmatter = {
       enabled = true,
-      --- @param note table
+      sort = { 'id', 'aliases', 'tags', 'created', 'updated' },
       func = function(note)
-        -- 如果已有 frontmatter，保留大部分字段
-        if note.metadata ~= nil and not vim.tbl_isempty(note.metadata) then
-          return note.metadata
-        end
+        local metadata = vim.tbl_extend('force', note.metadata or {}, {
+          id = note.id,
+          aliases = note.aliases or {},
+          tags = note.tags or {},
+        })
 
-        -- 生成新笔记的元数据
-        local out = { id = note.id, aliases = note.aliases, tags = note.tags }
+        local default_timestamp = note.title and note.title:match '^%d%d%d%d%-%d%d%-%d%d$' and os.date '%Y-%m-%d' or os.date '%Y-%m-%d %H:%M'
 
-        -- 如果 ID 不是日期格式，添加 created/updated 时间戳
-        if note.title and not note.title:match '%d%d%d%d%-%d%d%-%d%d' then
-          out.created = os.date '%Y-%m-%d %H:%M'
-          out.updated = os.date '%Y-%m-%d %H:%M'
-        end
+        metadata.aliases = metadata.aliases or {}
+        metadata.tags = metadata.tags or {}
+        metadata.created = metadata.created or default_timestamp
+        metadata.updated = metadata.updated or default_timestamp
 
-        return out
+        return metadata
       end,
     },
 
-    -- 7. 笔记 ID 生成规则
     note_id_func = function(title)
-      -- 优先使用标题作为文件名 (Readable)
-      local suffix = ''
-      if title ~= nil then
-        -- 将标题转换为文件名格式 (如 "My Note" -> "my-note")
-        return title:gsub(' ', '-'):gsub('[^A-Za-z0-9-]', ''):lower()
-      else
-        -- 否则使用 Zettelkasten 时间戳
-        for _ = 1, 4 do
-          suffix = suffix .. string.char(math.random(65, 90))
-        end
-        return tostring(os.time()) .. '-' .. suffix
-      end
+      return _sanitize_note_id(title) or _fallback_note_id()
     end,
   }
 end
 
---------------------------------------------------------------------------------
--- Enhancement Methods
---------------------------------------------------------------------------------
-
---- 智能回车行为：根据光标上下文执行不同操作
---- 1. 在 Markdown 链接上 -> 跳转
---- 2. 在复选框上 -> 切换状态
---- 3. 否则 -> 普通回车
---- @return string|nil
 local _smart_action = function()
   local obsidian = require 'obsidian'
   if obsidian.util.cursor_on_markdown_link(nil, nil, true) then
@@ -147,94 +225,82 @@ local _smart_action = function()
   end
 end
 
---- 设置 Obsidian 专用快捷键
---- @param client table
-local _setup_keymaps = function(client)
+local _setup_keymaps = function(bufnr)
   local map = function(mode, lhs, rhs, desc)
-    vim.keymap.set(mode, lhs, rhs, { remap = false, buffer = true, desc = desc })
+    vim.keymap.set(mode, lhs, rhs, { remap = false, buffer = bufnr, desc = desc })
   end
 
-  -- 核心操作 (Buffer-local)
+  map('n', 'gf', '<cmd>ObsidianFollowLink<CR>', 'Obsidian: Follow Link')
   map('n', 'gd', '<cmd>ObsidianFollowLink<CR>', 'Obsidian: Follow Link')
   map('n', '<CR>', _smart_action, 'Obsidian: Smart Action')
-  map('n', '<BS>', '<cmd>ObsidianBacklinks<CR>', 'Obsidian: Show Backlinks')
-
-  -- 高级操作 (Buffer-local)
+  map('n', '<leader>ob', '<cmd>ObsidianBacklinks<CR>', 'Obsidian: Show Backlinks')
   map('v', '<leader>ol', '<cmd>ObsidianLink<CR>', 'Obsidian: Link Selection')
   map('n', '<leader>oc', '<cmd>ObsidianToggleCheckbox<CR>', 'Obsidian: Toggle Checkbox')
   map('n', '<leader>op', '<cmd>ObsidianPasteImg<CR>', 'Obsidian: Paste Image')
 end
 
---- 自动配置：设置 Markdown 专属选项
+local _setup_buffer = function(bufnr)
+  vim.opt_local.conceallevel = 2
+  vim.opt_local.wrap = true
+  vim.bo[bufnr].textwidth = 0
+end
+
 local _setup_autocmds = function()
+  local group = vim.api.nvim_create_augroup(OBSIDIAN_GROUP, { clear = true })
+
   vim.api.nvim_create_autocmd('FileType', {
+    group = group,
     pattern = 'markdown',
-    callback = function()
-      vim.opt_local.conceallevel = 2 -- 隐藏 Markdown 语法符号，仅显示渲染效果
-      vim.opt_local.wrap = true -- 自动换行
+    callback = function(args)
+      if not vim.b[args.buf].obsidian_buffer then
+        return
+      end
+      _setup_keymaps(args.buf)
+      _setup_buffer(args.buf)
+    end,
+  })
+
+  vim.api.nvim_create_autocmd('BufWritePre', {
+    group = group,
+    pattern = '*.md',
+    callback = function(args)
+      _touch_updated_field(args.buf)
     end,
   })
 end
 
---------------------------------------------------------------------------------
--- Core Logic
---------------------------------------------------------------------------------
-
---- 初始化插件并挂载逻辑
---- @param _ any
---- @param opts table
 local _init_obsidian = function(_, opts)
   local obsidian = require 'obsidian'
   obsidian.setup(opts)
-
-  -- 仅在 Markdown 文件进入时绑定快捷键，避免污染全局
-  vim.api.nvim_create_autocmd('FileType', {
-    pattern = 'markdown',
-    callback = function()
-      _setup_keymaps(obsidian)
-      _setup_autocmds()
-    end,
-  })
+  _setup_autocmds()
 end
-
---------------------------------------------------------------------------------
--- Plugin Spec
---------------------------------------------------------------------------------
 
 return {
   'obsidian-nvim/obsidian.nvim',
   version = '*',
   lazy = true,
-  -- 使用 keys 触发加载，确保全局可用
   keys = {
     {
       '<leader>on',
-      function()
-        local vault_path = '/Users/shawn/Documents/Study/MyNotes/'
-        -- 1. 切换 Neovim 的工作目录到 Vault 根目录
-        -- 这样输入框的路径补全就会基于此目录
-        vim.cmd.cd(vault_path)
-        -- 2. 确保插件识别到该工作区
-        vim.cmd 'ObsidianWorkspace personal'
-        -- 3. 触发新建笔记
-        vim.cmd 'ObsidianNew'
-      end,
-      desc = 'Obsidian: New Note (at Vault Root)',
+      _new_from_template('new-note.md', 'New note title: '),
+      desc = 'Obsidian: New Rough Note',
+    },
+    {
+      '<leader>og',
+      _new_from_template('topic.md', 'New topic title: '),
+      desc = 'Obsidian: New Topic Page',
     },
     { '<leader>oo', '<cmd>ObsidianOpen<CR>', desc = 'Obsidian: Open in App' },
     { '<leader>od', '<cmd>ObsidianToday<CR>', desc = 'Obsidian: Daily Note' },
     { '<leader>oy', '<cmd>ObsidianYesterday<CR>', desc = 'Obsidian: Yesterday Note' },
     { '<leader>ot', '<cmd>ObsidianTemplate<CR>', desc = 'Obsidian: Insert Template' },
-    { '<leader>os', '<cmd>ObsidianSearch<CR>', desc = 'Obsidian: Search (Grep)' },
+    { '<leader>os', '<cmd>ObsidianSearch<CR>', desc = 'Obsidian: Search' },
     { '<leader>of', '<cmd>ObsidianQuickSwitch<CR>', desc = 'Obsidian: Find File' },
   },
-  ft = 'markdown', -- 也可以通过打开 Markdown 文件加载
+  ft = 'markdown',
   dependencies = {
-    -- 基础依赖
     'nvim-lua/plenary.nvim',
-    -- 搜索依赖 (可选但推荐)
     'nvim-telescope/telescope.nvim',
-    -- 语法高亮依赖
     'nvim-treesitter/nvim-treesitter',
   },
   opts = _get_obsidian_opts(),

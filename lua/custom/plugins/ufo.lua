@@ -7,11 +7,10 @@ return {
   dependencies = 'kevinhwang91/promise-async',
   event = 'BufRead',
   keys = {
-    { 'zc', function() require('ufo').closeAllFolds() end, desc = 'Close all folds' },
-    { 'zo', function() require('ufo').openFoldsExceptKinds() end, desc = 'Open folds' },
-    { 'za', function() require('ufo').toggleFold() end, desc = 'Toggle fold' },
     { 'zR', function() require('ufo').openAllFolds() end, desc = 'Open all folds' },
     { 'zM', function() require('ufo').closeAllFolds() end, desc = 'Close all folds' },
+    { 'zr', function() require('ufo').openFoldsExceptKinds() end, desc = 'Open folds except kinds' },
+    { 'zm', function() require('ufo').closeFoldsWith() end, desc = 'Close folds by level' },
   },
   opts = {
     provider_selector = function(_, filetype, _)

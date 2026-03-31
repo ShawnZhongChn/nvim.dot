@@ -55,6 +55,14 @@ vim.o.updatetime = 250
 -- Decrease mapped sequence wait time
 vim.o.timeoutlen = 300
 
+-- Preserve fold state across mode transitions
+-- Keep folds open by default so recalculation does not collapse the buffer
+vim.o.foldlevel = 99
+vim.o.foldlevelstart = 99
+vim.o.foldenable = true
+-- Avoid closing folds automatically when leaving Insert mode
+vim.opt.foldclose:remove 'insert'
+
 -- Configure how new splits should be opened
 vim.o.splitright = true
 vim.o.splitbelow = true
