@@ -19,7 +19,13 @@ local function _create_idea_scratch()
     prompt = 'Create Scratch File ❯ ',
   }, function(choice)
     if choice then
-      require('snacks').scratch { ft = choice, name = 'Scratch' }
+      -- 使用精确到秒的时间戳，确保每次都是独立的新文件
+      local timestamp = os.date '%Y%m%d_%H%M%S'
+      require('snacks').scratch {
+        ft = choice,
+        name = 'Scratch_' .. timestamp,
+        id = timestamp,
+      }
     end
   end)
 end

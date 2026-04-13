@@ -1,4 +1,4 @@
-local VAULT_PATH = '/Users/shawn/Documents/Study/MyNotes'
+local VAULT_PATH = '/Users/shawn/Documents/Personal/MyNotes'
 local ROUGH_NOTES_DIR = '1 - Rough Notes'
 local TOPIC_PAGES_DIR = '3 - Tags'
 local DAILY_NOTES_DIR = 'dailies'
@@ -41,7 +41,9 @@ local _is_daily_path = function(path)
 end
 
 local _ensure_workspace = function()
-  vim.cmd 'ObsidianWorkspace personal'
+  if vim.fn.exists ':Obsidian' == 2 then
+    vim.cmd 'Obsidian workspace personal'
+  end
 end
 
 local _new_from_template = function(template_name, prompt)
@@ -104,6 +106,7 @@ local _get_obsidian_opts = function()
       },
     },
 
+    legacy_commands = false,
     notes_subdir = ROUGH_NOTES_DIR,
     new_notes_location = 'notes_subdir',
 
@@ -217,9 +220,9 @@ end
 local _smart_action = function()
   local obsidian = require 'obsidian'
   if obsidian.util.cursor_on_markdown_link(nil, nil, true) then
-    return '<cmd>ObsidianFollowLink<CR>'
+    return '<cmd>Obsidian follow_link<CR>'
   elseif obsidian.util.cursor_on_checkbox(nil, nil) then
-    return '<cmd>ObsidianToggleCheckbox<CR>'
+    return '<cmd>Obsidian toggle_checkbox<CR>'
   else
     return '<CR>'
   end
@@ -230,13 +233,13 @@ local _setup_keymaps = function(bufnr)
     vim.keymap.set(mode, lhs, rhs, { remap = false, buffer = bufnr, desc = desc })
   end
 
-  map('n', 'gf', '<cmd>ObsidianFollowLink<CR>', 'Obsidian: Follow Link')
-  map('n', 'gd', '<cmd>ObsidianFollowLink<CR>', 'Obsidian: Follow Link')
+  map('n', 'gf', '<cmd>Obsidian follow_link<CR>', 'Obsidian: Follow Link')
+  map('n', 'gd', '<cmd>Obsidian follow_link<CR>', 'Obsidian: Follow Link')
   map('n', '<CR>', _smart_action, 'Obsidian: Smart Action')
-  map('n', '<leader>ob', '<cmd>ObsidianBacklinks<CR>', 'Obsidian: Show Backlinks')
-  map('v', '<leader>ol', '<cmd>ObsidianLink<CR>', 'Obsidian: Link Selection')
-  map('n', '<leader>oc', '<cmd>ObsidianToggleCheckbox<CR>', 'Obsidian: Toggle Checkbox')
-  map('n', '<leader>op', '<cmd>ObsidianPasteImg<CR>', 'Obsidian: Paste Image')
+  map('n', '<leader>ob', '<cmd>Obsidian backlinks<CR>', 'Obsidian: Show Backlinks')
+  map('v', '<leader>ol', '<cmd>Obsidian link<CR>', 'Obsidian: Link Selection')
+  map('n', '<leader>oc', '<cmd>Obsidian toggle_checkbox<CR>', 'Obsidian: Toggle Checkbox')
+  map('n', '<leader>op', '<cmd>Obsidian paste_img<CR>', 'Obsidian: Paste Image')
 end
 
 local _setup_buffer = function(bufnr)
@@ -290,12 +293,12 @@ return {
       _new_from_template('topic.md', 'New topic title: '),
       desc = 'Obsidian: New Topic Page',
     },
-    { '<leader>oo', '<cmd>ObsidianOpen<CR>', desc = 'Obsidian: Open in App' },
-    { '<leader>od', '<cmd>ObsidianToday<CR>', desc = 'Obsidian: Daily Note' },
-    { '<leader>oy', '<cmd>ObsidianYesterday<CR>', desc = 'Obsidian: Yesterday Note' },
-    { '<leader>ot', '<cmd>ObsidianTemplate<CR>', desc = 'Obsidian: Insert Template' },
-    { '<leader>os', '<cmd>ObsidianSearch<CR>', desc = 'Obsidian: Search' },
-    { '<leader>of', '<cmd>ObsidianQuickSwitch<CR>', desc = 'Obsidian: Find File' },
+    { '<leader>oo', '<cmd>Obsidian open<CR>', desc = 'Obsidian: Open in App' },
+    { '<leader>od', '<cmd>Obsidian today<CR>', desc = 'Obsidian: Daily Note' },
+    { '<leader>oy', '<cmd>Obsidian yesterday<CR>', desc = 'Obsidian: Yesterday Note' },
+    { '<leader>ot', '<cmd>Obsidian template<CR>', desc = 'Obsidian: Insert Template' },
+    { '<leader>os', '<cmd>Obsidian search<CR>', desc = 'Obsidian: Search' },
+    { '<leader>of', '<cmd>Obsidian quick_switch<CR>', desc = 'Obsidian: Find File' },
   },
   ft = 'markdown',
   dependencies = {

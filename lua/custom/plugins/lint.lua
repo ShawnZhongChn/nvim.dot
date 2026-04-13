@@ -8,7 +8,6 @@
 local _get_linters = function()
   return {
     markdown = { 'markdownlint-cli2' },
-    json = { 'jsonlint' },
     dockerfile = { 'hadolint' },
   }
 end

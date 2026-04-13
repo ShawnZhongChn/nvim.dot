@@ -14,6 +14,7 @@ local function _get_opts()
       'luadoc',
       'markdown',
       'markdown_inline',
+      'python',
       'query',
       'vim',
       'vimdoc',

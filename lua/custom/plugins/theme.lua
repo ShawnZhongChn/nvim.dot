@@ -7,5 +7,7 @@ return {
   config = function()
     -- require("koda").setup({ transparent = true })
     vim.cmd 'colorscheme koda'
+    -- UFO 折叠省略号样式 (黑白)
+    vim.api.nvim_set_hl(0, 'UfoFoldedEllipsis', { fg = '#999999', bold = true })
   end,
 }

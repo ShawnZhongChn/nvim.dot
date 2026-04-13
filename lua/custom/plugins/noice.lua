@@ -33,6 +33,13 @@ local _get_routes = function()
       filter = { event = 'msg_show', find = 'written' }, -- 隐藏 "X lines written"
       opts = { skip = true },
     },
+    {
+      filter = {
+        event = 'notify',
+        find = 'Using a password on the command line interface can be insecure',
+      },
+      opts = { skip = true },
+    },
   }
 end
 

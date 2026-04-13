@@ -55,13 +55,26 @@ vim.o.updatetime = 250
 -- Decrease mapped sequence wait time
 vim.o.timeoutlen = 300
 
--- Preserve fold state across mode transitions
--- Keep folds open by default so recalculation does not collapse the buffer
+-- [[ Folding Configuration ]]
+vim.o.foldcolumn = '0' -- 彻底移除左侧缩进提示
 vim.o.foldlevel = 99
 vim.o.foldlevelstart = 99
 vim.o.foldenable = true
--- Avoid closing folds automatically when leaving Insert mode
-vim.opt.foldclose:remove 'insert'
+-- foldmethod 和 foldexpr 由 ufo 管理，不在此设置
+
+-- 彻底取消 "--- 14 lines" 这种显示，只显示原始行内容 (回退方案)
+_G.custom_fold_text = function()
+  return vim.fn.getline(vim.v.foldstart) .. ' ⋯ '
+end
+vim.opt.foldtext = 'v:lua.custom_fold_text()'
+
+vim.opt.fillchars = {
+  eob = ' ',
+  fold = ' ',
+  foldopen = ' ',
+  foldsep = ' ',
+  foldclose = ' ',
+}
 
 -- Configure how new splits should be opened
 vim.o.splitright = true
