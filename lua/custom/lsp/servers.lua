@@ -8,7 +8,10 @@ local M = {}
 local _get_roots = function()
   local util = require 'lspconfig.util'
   return {
-    python = util.root_pattern('pyproject.toml', 'setup.py', 'requirements.txt', '.git'),
+    python = function(fname)
+      return util.root_pattern('pyproject.toml', 'setup.py', 'requirements.txt', '.git')(fname)
+        or util.path.dirname(fname)
+    end,
     lua = util.root_pattern('init.lua', '.stylua.toml'),
     markdown = util.root_pattern('.marksman.toml', '.git'),
     yaml = util.root_pattern('.git'),

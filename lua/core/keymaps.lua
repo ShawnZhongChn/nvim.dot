@@ -9,6 +9,7 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 -- LSP keymaps
+vim.keymap.set('n', '<leader>li', '<cmd>LspInfo<CR>', { desc = 'LSP: Info' })
 vim.keymap.set('n', '<leader>ll', '<cmd>LspLog<CR>', { desc = 'LSP: Open Log' })
 vim.keymap.set('n', '<leader>lr', '<cmd>LspRestart<CR>', { desc = 'LSP: Restart' })
 

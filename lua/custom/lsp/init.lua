@@ -29,6 +29,29 @@ function M.setup()
   vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = 'rounded' })
   vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signatureHelp, { border = 'rounded' })
 
+  if vim.fn.exists(':LspInfo') == 0 then
+    vim.api.nvim_create_user_command('LspInfo', function()
+      vim.cmd 'checkhealth vim.lsp'
+    end, { desc = 'Alias to :checkhealth vim.lsp' })
+  end
+
+  if vim.fn.exists(':LspLog') == 0 then
+    vim.api.nvim_create_user_command('LspLog', function()
+      vim.cmd(('tabnew %s'):format(vim.lsp.log.get_filename()))
+    end, { desc = 'Open the Nvim LSP client log' })
+  end
+
+  if vim.fn.exists(':LspRestart') == 0 then
+    vim.api.nvim_create_user_command('LspRestart', function()
+      if vim.tbl_isempty(vim.lsp.get_clients { bufnr = 0 }) then
+        vim.notify('No LSP clients attached to current buffer', vim.log.levels.WARN)
+        return
+      end
+
+      vim.cmd 'lsp restart'
+    end, { desc = 'Restart LSP clients for current buffer' })
+  end
+
   -- 2. 诊断配置应用
   vim.diagnostic.config(_get_diagnostic_opts())
 
@@ -65,22 +88,22 @@ function M.setup()
     dynamicRegistration = false,
     lineFoldingOnly = true,
   }
+
   require('mason-lspconfig').setup {
-    handlers = {
-      function(server_name)
-        local server = servers[server_name] or {}
-        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-
-        -- 避免 Basedpyright 抢夺格式化权
-        if server_name == 'basedpyright' then
-          server.capabilities.documentFormattingProvider = false
-          server.capabilities.documentRangeFormattingProvider = false
-        end
-
-        require('lspconfig')[server_name].setup(server)
-      end,
-    },
+    automatic_enable = false,
   }
+
+  for server_name, server in pairs(servers) do
+    server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+
+    -- 避免 Basedpyright 抢夺格式化权
+    if server_name == 'basedpyright' then
+      server.capabilities.documentFormattingProvider = false
+      server.capabilities.documentRangeFormattingProvider = false
+    end
+
+    require('lspconfig')[server_name].setup(server)
+  end
 end
 
 return M
