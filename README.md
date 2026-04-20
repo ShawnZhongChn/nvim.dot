@@ -89,7 +89,7 @@ nvim
 | `<leader>lg` | LazyGit | 打开 Git 浮窗 |
 | `<leader>e` | Yazi | 打开文件管理器 (当前目录) |
 | `<leader>cf` | Format | 格式化当前代码 |
-| `<leader>q` | Quit | 关闭当前窗口 |
+| `<leader>q` | Diagnostic List | 打开诊断位置列表 |
 | `gd` | Goto Definition | 跳转定义 (合并引用) |
 | `grr` | References | 查看引用 |
 

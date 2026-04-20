@@ -36,6 +36,31 @@ local _sanitize_note_id = function(title)
   return sanitized
 end
 
+local function _url_encode(str)
+  if not str then return "" end
+  str = string.gsub(str, " ", "%%20")
+  str = string.gsub(str, "!", "%%21")
+  str = string.gsub(str, "#", "%%23")
+  str = string.gsub(str, "$", "%%24")
+  str = string.gsub(str, "&", "%%26")
+  str = string.gsub(str, "'", "%%27")
+  str = string.gsub(str, "(", "%%28")
+  str = string.gsub(str, ")", "%%29")
+  str = string.gsub(str, "*", "%%2A")
+  str = string.gsub(str, "+", "%%2B")
+  str = string.gsub(str, ",", "%%2C")
+  str = string.gsub(str, "/", "%%2F")
+  str = string.gsub(str, ":", "%%3A")
+  str = string.gsub(str, ";", "%%3B")
+  str = string.gsub(str, "=", "%%3D")
+  str = string.gsub(str, "?", "%%3F")
+  str = string.gsub(str, "@", "%%40")
+  str = string.gsub(str, "[", "%%5B")
+  str = string.gsub(str, "]", "%%5D")
+  return str
+end
+
+
 local _is_daily_path = function(path)
   return path ~= nil and path:find('/' .. DAILY_NOTES_DIR .. '/', 1, true) ~= nil
 end
@@ -293,7 +318,14 @@ return {
       _new_from_template('topic.md', 'New topic title: '),
       desc = 'Obsidian: New Topic Page',
     },
-    { '<leader>oo', '<cmd>Obsidian open<CR>', desc = 'Obsidian: Open in App' },
+    { '<leader>oo', function()
+      local file_path = vim.fn.expand('%:p')
+      local vault_name = 'MyNotes'
+      local url_encoded_file_path = _url_encode(file_path)
+      local obsidian_url = string.format('obsidian://open?vault=%s&file=%s', vault_name, url_encoded_file_path)
+      vim.fn.system({'open', obsidian_url}) -- macOS specific command
+      print('Opening in Obsidian: ' .. obsidian_url)
+    end, desc = 'Obsidian: Open current file' },
     { '<leader>od', '<cmd>Obsidian today<CR>', desc = 'Obsidian: Daily Note' },
     { '<leader>oy', '<cmd>Obsidian yesterday<CR>', desc = 'Obsidian: Yesterday Note' },
     { '<leader>ot', '<cmd>Obsidian template<CR>', desc = 'Obsidian: Insert Template' },

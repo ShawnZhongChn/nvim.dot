@@ -3,6 +3,13 @@
 
 local M = {}
 
+local function _with_rounded_border(handler)
+  return function(err, result, ctx, config)
+    local merged = vim.tbl_deep_extend('force', { border = 'rounded' }, config or {})
+    return handler(err, result, ctx, merged)
+  end
+end
+
 --- @Note 获取诊断 (Diagnostic) 的显示配置
 --- @return table
 local _get_diagnostic_opts = function()
@@ -26,8 +33,8 @@ end
 --- @Note 核心初始化逻辑
 function M.setup()
   -- 1. UI 装饰
-  vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = 'rounded' })
-  vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signatureHelp, { border = 'rounded' })
+  vim.lsp.handlers['textDocument/hover'] = _with_rounded_border(vim.lsp.handlers.hover)
+  vim.lsp.handlers['textDocument/signatureHelp'] = _with_rounded_border(vim.lsp.handlers.signature_help)
 
   if vim.fn.exists(':LspInfo') == 0 then
     vim.api.nvim_create_user_command('LspInfo', function()
@@ -65,14 +72,32 @@ function M.setup()
   -- 4. Mason 工具全自动安装
   local servers_module = require('custom.lsp.servers')
   local servers = servers_module.get_servers()
-  local ensure_installed = vim.tbl_keys(servers or {})
-  
+  local mason_packages = {
+    yamlls = 'yaml-language-server',
+    lua_ls = 'lua-language-server',
+    basedpyright = 'basedpyright',
+    ruff = 'ruff',
+    marksman = 'marksman',
+    vtsls = 'vtsls',
+    tailwindcss = 'tailwindcss-language-server',
+    biome = 'biome',
+  }
+  local ensure_installed = {}
+
+  for server_name, _ in pairs(servers or {}) do
+    local package_name = mason_packages[server_name]
+
+    if package_name then
+      table.insert(ensure_installed, package_name)
+    end
+  end
+
   -- 手动补充非 LSP 工具 (Formatter & Linter)
   vim.list_extend(ensure_installed, {
     'stylua',
     'markdownlint-cli2', -- 解决 ENOENT 报错的核心
+    'prettierd', -- 配合 conform.nvim
     'prettier', -- 配合 conform.nvim
-    'yaml-language-server',
   })
 
   require('mason-tool-installer').setup {
@@ -102,7 +127,8 @@ function M.setup()
       server.capabilities.documentRangeFormattingProvider = false
     end
 
-    require('lspconfig')[server_name].setup(server)
+    vim.lsp.config(server_name, server)
+    vim.lsp.enable(server_name)
   end
 end
 

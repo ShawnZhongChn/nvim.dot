@@ -14,7 +14,7 @@ local _lsp_merged_search = function()
   local bufnr = vim.api.nvim_get_current_buf()
   local clients = vim.lsp.get_clients({ bufnr = bufnr })
   if #clients == 0 then return vim.notify('LSP: No client attached') end
-  local offset_encoding = clients[1].offset_encoding
+  local offset_encoding = vim.lsp.util._get_offset_encoding(bufnr)
 
   local locations_seen = {}
   local priorities = { Definition = 3, Declaration = 2, Reference = 1 }
@@ -107,7 +107,7 @@ local _lsp_merged_search = function()
   end
 
   for _, m in ipairs(valid_methods) do
-    local params = vim.lsp.util.make_position_params()
+    local params = vim.lsp.util.make_position_params(0, offset_encoding)
     params.context = { includeDeclaration = true }
     vim.lsp.buf_request_all(bufnr, m[1], params, function(results)
       for _, res in pairs(results) do
@@ -152,7 +152,7 @@ function M.on_attach(event)
   end
 
   -- 自动高亮 (CursorHold)
-  if client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
+  if client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) and client.name ~= 'vtsls' then
     local highlight_group = vim.api.nvim_create_augroup('lsp-highlight-' .. event.buf, { clear = true })
     vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
       buffer = event.buf,

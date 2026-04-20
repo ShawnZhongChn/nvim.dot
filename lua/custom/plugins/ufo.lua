@@ -1,5 +1,5 @@
 --- @Note: nvim-ufo 深度增强版
---- 1. 支持 LSP, Treesitter 和 Indent 多重驱动回退。
+--- 1. 支持 LSP 和 Indent 双重驱动回退。
 --- 2. 彻底移除 "--- 14 lines" 这种丑陋的显示，采用极简现代风格。
 
 return {
@@ -7,18 +7,43 @@ return {
   dependencies = 'kevinhwang91/promise-async',
   event = 'BufReadPost', -- 稍微提前加载，确保在文件打开时即生效
   keys = {
-    { 'zR', function() require('ufo').openAllFolds() end, desc = 'Open all folds' },
-    { 'zM', function() require('ufo').closeAllFolds() end, desc = 'Close all folds' },
+    {
+      'zr',
+      function()
+        pcall(vim.cmd, 'silent! normal! zo')
+      end,
+      desc = 'Open current fold',
+    },
+    {
+      'zR',
+      function()
+        pcall(vim.cmd, 'silent! normal! zR')
+        pcall(function()
+          require('ufo').openAllFolds()
+        end)
+      end,
+      desc = 'Open all folds',
+    },
+    {
+      'zM',
+      function()
+        pcall(vim.cmd, 'silent! normal! zM')
+        pcall(function()
+          require('ufo').closeAllFolds()
+        end)
+      end,
+      desc = 'Close all folds',
+    },
   },
   opts = {
-    -- 驱动选择器：优先 LSP，其次 Treesitter，最后 Indent
+    -- 驱动选择器：优先 LSP，其次 Indent
     provider_selector = function(bufnr, filetype, buftype)
       return { 'lsp', 'indent' }
     end,
 
-    -- 显式设置：不自动关闭任何类型的折叠，防止模式切换时重新计算导致的意外关闭
+    -- 默认自动关闭 import 类型折叠，其余折叠保持手动控制
     close_fold_kinds_for_ft = {
-      default = {},
+      default = { 'imports' },
     },
 
     -- 自定义折叠虚拟文本显示
@@ -58,5 +83,6 @@ return {
   config = function(_, opts)
     -- 注意：ufo 需要手动开启 foldcolumn 如果需要的话，但我们保持 0 以维持极简
     require('ufo').setup(opts)
+    require('custom.folding').setup()
   end,
 }

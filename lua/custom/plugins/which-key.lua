@@ -45,25 +45,28 @@ end
 --- @Note 定义全局组名映射 (Spec)
 --- @return table
 local _get_wk_spec = function()
+  local icon = function(glyph)
+    return vim.g.have_nerd_font and glyph or nil
+  end
+
   return {
-    { '<leader>c', group = '[C]ode', mode = { 'n', 'x' } },
+    { '<leader>c', group = '[C]ode', mode = { 'n', 'x' }, icon = icon ' ' },
     { '<leader>cd', group = '[D]iagnostic' },
     { '<leader>cdd', group = 'Document Diagnostics' },
     { '<leader>cdp', group = 'Project Diagnostics' },
     { '<leader>cq', group = 'Quickfix List' },
     { '<leader>cw', group = 'Workspace Diagnostics' },
-    { '<leader>d', group = '[D]ocument' },
-    { '<leader>n', group = '[N]otices' },
-    { '<leader>r', group = '[R]ename' },
-    { '<leader>o', group = '[O]bsidian' },
-    { '<leader>s', group = '[S]earch' },
-    { '<leader>w', group = '[W]orkspace' },
-    { '<leader>t', group = '[T]oggle' },
-    { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
-    { '<leader>f', group = '[F]iles / Oil', icon = '󰉓 ' },
-    { '<leader>l', group = '[L]azy', icon = '󰊢 ' },
-    { '<leader>q', proxy = '<c-w>', group = '[W]indows' },
-    { '<leader>fs', group = '[S]cratch Pad', icon = '󰄱 ' },
+    { '<leader>d', group = '[D]ocument', icon = icon ' ' },
+    { '<leader>n', group = '[N]otices', icon = icon ' ' },
+    { '<leader>r', group = '[R]ename', icon = icon ' ' },
+    { '<leader>o', group = '[O]bsidian', icon = icon ' ' },
+    { '<leader>s', group = '[S]earch', icon = icon ' ' },
+    { '<leader>w', group = '[W]orkspace', icon = icon ' ' },
+    { '<leader>t', group = '[T]oggle', icon = icon ' ' },
+    { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' }, icon = icon ' ' },
+    { '<leader>f', group = '[F]iles / Oil', icon = icon '󰉓 ' },
+    { '<leader>l', group = '[L]azy', icon = icon '󰊢 ' },
+    { '<leader>fs', group = '[S]cratch Pad', icon = icon '󰄱 ' },
   }
 end
 

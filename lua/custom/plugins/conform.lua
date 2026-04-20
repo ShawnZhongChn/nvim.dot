@@ -11,8 +11,14 @@
 local _get_formatters_by_ft = function()
   return {
     lua = { 'stylua' },
+    javascript = { 'biome', stop_after_first = true },
+    javascriptreact = { 'biome', stop_after_first = true },
+    typescript = { 'biome', stop_after_first = true },
+    typescriptreact = { 'biome', stop_after_first = true },
+    css = { 'biome', stop_after_first = true },
+    json = { 'biome', stop_after_first = true },
+    jsonc = { 'biome', stop_after_first = true },
     markdown = { 'prettierd', 'prettier', stop_after_first = true },
-    json = { 'prettierd', 'prettier', stop_after_first = true },
     yaml = { 'prettierd', 'prettier', stop_after_first = true },
   }
 end

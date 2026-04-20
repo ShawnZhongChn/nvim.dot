@@ -56,6 +56,11 @@ local function _init()
   -- 0. 加载全局工具
   require 'globals'
 
+  -- 0.1 尽早禁用 netrw，避免目录打开时被原生浏览器接管
+  vim.g.loaded_netrw = 1
+  vim.g.loaded_netrwPlugin = 1
+  vim.opt.termguicolors = true
+
   -- 1. 加载核心配置 (确保 mapleader 在 Lazy 启动前设置)
   _load_core_config()
 
@@ -75,3 +80,4 @@ end
 _init()
 
 -- vim: ts=2 sts=2 sw=2 et
+

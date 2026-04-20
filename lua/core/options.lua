@@ -6,10 +6,10 @@ vim.g.maplocalleader = ' '
 
 -- Auto-detect Nerd Font based on terminal/emulator
 vim.g.have_nerd_font = (
-  vim.fn.has('gui_running') == 1
+  vim.fn.has 'gui_running' == 1
   or vim.env.TERM_PROGRAM == 'Apple_Terminal'
   or vim.env.TERM_PROGRAM == 'iTerm.app'
-  or vim.fn.executable('nvim-qt') == 1
+  or vim.fn.executable 'nvim-qt' == 1
   or (vim.env.TERM and vim.env.TERM:match 'nerd')
 )
 
@@ -98,7 +98,7 @@ vim.o.inccommand = 'split'
 vim.o.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.o.scrolloff = 10
+vim.o.scrolloff = 30
 
 -- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
 -- instead raise a dialog asking if you wish to save the current file(s)

@@ -11,6 +11,7 @@ return {
     'WhoIsSethDaniel/mason-tool-installer.nvim',
     'b0o/SchemaStore.nvim',
     'towolf/vim-helm',
+    'yioneko/nvim-vtsls',
   },
   config = function()
     require('custom.lsp').setup()

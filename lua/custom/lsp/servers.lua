@@ -3,18 +3,50 @@
 
 local M = {}
 
+local function _find_root(bufnr, markers, fallback_to_file_dir)
+  local path = vim.api.nvim_buf_get_name(bufnr)
+  local root = vim.fs.root(bufnr, markers)
+
+  if root then
+    return root
+  end
+
+  if fallback_to_file_dir and path ~= '' then
+    return vim.fs.dirname(vim.fs.normalize(path))
+  end
+end
+
+local function _root_dir(markers, fallback_to_file_dir)
+  return function(bufnr, on_dir)
+    on_dir(_find_root(bufnr, markers, fallback_to_file_dir))
+  end
+end
+
 --- @Note 定义各语言项目的根目录检测逻辑
 --- @return table
 local _get_roots = function()
-  local util = require 'lspconfig.util'
   return {
-    python = function(fname)
-      return util.root_pattern('pyproject.toml', 'setup.py', 'requirements.txt', '.git')(fname)
-        or util.path.dirname(fname)
-    end,
-    lua = util.root_pattern('init.lua', '.stylua.toml'),
-    markdown = util.root_pattern('.marksman.toml', '.git'),
-    yaml = util.root_pattern('.git'),
+    python = _root_dir({ 'pyproject.toml', 'setup.py', 'requirements.txt', '.git' }, true),
+    lua = _root_dir({ 'init.lua', '.stylua.toml' }, false),
+    markdown = _root_dir({ '.marksman.toml', '.git' }, false),
+    yaml = _root_dir({ '.git' }, false),
+    frontend = _root_dir({
+      'package.json',
+      'tsconfig.json',
+      'jsconfig.json',
+      'vite.config.ts',
+      'vite.config.js',
+      '.git',
+    }, true),
+    biome = _root_dir({ 'biome.json', 'biome.jsonc', 'package.json', '.git' }, false),
+    tailwind = _root_dir({
+      'tailwind.config.ts',
+      'tailwind.config.js',
+      'postcss.config.ts',
+      'postcss.config.js',
+      'package.json',
+      '.git',
+    }, false),
   }
 end
 
@@ -45,6 +77,21 @@ function M.get_servers()
 
     -- Markdown: 文档导航与补全
     marksman = { root_dir = roots.markdown },
+
+    -- TypeScript / React: 补全、跳转、重构、导入整理
+    vtsls = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.vtsls', {
+      root_dir = roots.frontend,
+    }),
+
+    -- Tailwind CSS: 类名补全、Hover 与校验
+    tailwindcss = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.tailwindcss', {
+      root_dir = roots.tailwind,
+    }),
+
+    -- Biome: 前端静态检查与格式化
+    biome = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.biome', {
+      root_dir = roots.biome,
+    }),
   }
 end
 

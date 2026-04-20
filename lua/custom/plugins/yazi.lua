@@ -16,6 +16,8 @@ local _get_opts = function()
       border = 'rounded',
       relative = 'editor',
     },
+    -- 让 Yazi 接管目录打开行为（如 nvim . / :edit .）
+    open_for_directories = true,
     -- 启用 Git 集成
     set_keymaps = false, -- 我们在下面手动定义
     yazi_floating_window_winblend = 0,
@@ -56,7 +58,7 @@ end
 
 return {
   'mikavilpas/yazi.nvim',
-  event = 'VeryLazy',
+  lazy = false,
   dependencies = {
     'nvim-lua/plenary.nvim',
   },
