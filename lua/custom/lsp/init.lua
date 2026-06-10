@@ -81,6 +81,7 @@ function M.setup()
     vtsls = 'vtsls',
     tailwindcss = 'tailwindcss-language-server',
     biome = 'biome',
+    -- rust_analyzer: 由 rustaceanvim 通过 rustup 管理，不走 Mason
   }
   local ensure_installed = {}
 

@@ -26,6 +26,7 @@ end
 --- @return table
 local _get_roots = function()
   return {
+    rust = _root_dir({ 'Cargo.toml', 'rust-project.json', '.git' }, true),
     python = _root_dir({ 'pyproject.toml', 'setup.py', 'requirements.txt', '.git' }, true),
     lua = _root_dir({ 'init.lua', '.stylua.toml' }, false),
     markdown = _root_dir({ '.marksman.toml', '.git' }, false),
@@ -55,6 +56,7 @@ end
 function M.get_servers()
   local roots = _get_roots()
   return {
+    
     -- YAML: 通过 SchemaStore 提供极致的 Kubernetes/Helm 补全
     yamlls = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.yamlls', {
       root_dir = roots.yaml,

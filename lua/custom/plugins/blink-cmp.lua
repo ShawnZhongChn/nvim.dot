@@ -61,7 +61,13 @@ local function _get_opts()
         lazydev = {
           name = 'LazyDev',
           module = 'lazydev.integrations.blink',
-          score_offset = 100, -- 提高 Lua 配置文件的补全优先级
+          score_offset = 100,
+        },
+        -- crates.nvim 集成 (Cargo.toml 版本补全)
+        crates = {
+          name = 'Crates',
+          module = 'crates.nvim',
+          score_offset = 90,
         },
       },
     },

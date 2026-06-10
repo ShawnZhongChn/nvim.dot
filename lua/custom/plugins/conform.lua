@@ -10,6 +10,7 @@
 --- @return table
 local _get_formatters_by_ft = function()
   return {
+    rust = { 'rustfmt' },
     lua = { 'stylua' },
     javascript = { 'biome', stop_after_first = true },
     javascriptreact = { 'biome', stop_after_first = true },

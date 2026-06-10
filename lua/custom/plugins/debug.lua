@@ -95,6 +95,7 @@ return {
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        'codelldb',
       },
     }
 
@@ -144,5 +145,53 @@ return {
         detached = vim.fn.has 'win32' == 0,
       },
     }
+
+    -- Install rust-analyzer/codelldb debug adapter
+    local ext = vim.fn.stdpath 'data' .. '/mason/packages/codelldb/extension/'
+    dap.configurations.rust = {
+      {
+        type = 'rtvs',
+        request = 'launch',
+        name = 'Launch Rust (rtvs)',
+        program = function()
+          return vim.fn.input('Path to executable: ', '', 'file')
+        end,
+      },
+    }
+    -- Also register the codelldb adapter if found
+    if ext and vim.fn.isdirectory(ext) ~= 0 then
+      dap.adapters.codelldb = {
+        type = 'server',
+        host = '127.0.0.1',
+        port = function()
+          return os.getenv 'CODELLDB_PORT' or 13000
+        end,
+        executable = {
+          command = ext .. 'adapter/codelldb',
+          args = { '--port', tostring(os.getenv 'CODELLDB_PORT' or 13000) },
+        },
+      }
+      dap.configurations.rust = dap.configurations.rust or {}
+      vim.list_extend(dap.configurations.rust, {
+        {
+          type = 'codelldb',
+          request = 'launch',
+          name = 'Launch Rust (codelldb)',
+          program = function()
+            return vim.fn.input('Path to executable: ', '${workspaceFolder}/target/debug/', 'file')
+          end,
+          cwd = '${workspaceFolder}',
+        },
+        {
+          type = 'codelldb',
+          request = 'attach',
+          name = 'Attach to Rust process (codelldb)',
+          pid = function()
+            return tonumber(vim.fn.input 'Process ID: ')
+          end,
+          cwd = '${workspaceFolder}',
+        },
+      })
+    end
   end,
 }
