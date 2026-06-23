@@ -1,3 +1,5 @@
+local config = require 'custom.config'
+
 --- @Note venv-selector 核心配置：使用 fd 精准检索 Conda 环境
 --- @author shawn
 
@@ -12,7 +14,7 @@ local _get_anaconda_search_opts = function()
     -- -L: 跟随软链接
     -- -a: 输出绝对路径
     -- -p: 关键！开启路径全匹配，否则搜不到 bin/python
-    command = 'fd -L -a -p "bin/python$" /opt/miniconda3/envs --color never',
+    command = 'fd -L -a -p "bin/python$" ' .. config.get_value({ 'env', 'conda_envs_path' }, '/opt/miniconda3/envs') .. ' --color never',
     type = 'anaconda',
   }
 end

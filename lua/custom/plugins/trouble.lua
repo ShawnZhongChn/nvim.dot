@@ -7,22 +7,22 @@ return {
   dependencies = { 'nvim-telescope/telescope.nvim' },
   keys = {
     {
-      '<leader>cdd',
+      '<leader>xd',
       '<cmd>Trouble diagnostics toggle<CR>',
       desc = 'Document Diagnostics',
     },
     {
-      '<leader>cdp',
+      '<leader>xp',
       '<cmd>Trouble diagnostics toggle filter.buf=0<CR>',
       desc = 'Project Diagnostics',
     },
     {
-      '<leader>cq',
+      '<leader>xq',
       '<cmd>Trouble qflist toggle<CR>',
       desc = 'Quickfix List',
     },
     {
-      '<leader>cw',
+      '<leader>xw',
       '<cmd>Trouble lsp_workspace_diagnostics toggle<CR>',
       desc = 'Workspace Diagnostics',
     },

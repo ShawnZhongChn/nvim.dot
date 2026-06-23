@@ -1,4 +1,5 @@
----
+local config = require 'custom.config'
+
 --- @Note: Peek Markdown Preview
 --- @Desc: Markdown preview with live update, synchronized scrolling, GitHub-style rendering, KaTeX math, and Mermaid diagrams
 ---
@@ -7,6 +8,7 @@ return {
   'toppair/peek.nvim',
   event = { 'VeryLazy' },
   build = 'deno task --quiet build:fast',
+  enabled = config.is_enabled('markdown_preview'),
   config = function()
     require('peek').setup({
       auto_load = true,

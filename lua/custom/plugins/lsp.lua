@@ -1,5 +1,4 @@
 --- @Note Main LSP Configuration (nvim-lspconfig)
---- 遵循模块化布局，集成了 Mason, Blink.cmp, Lazydev 及 Python 深度增强。
 --- @url: https://github.com/neovim/nvim-lspconfig
 
 return {

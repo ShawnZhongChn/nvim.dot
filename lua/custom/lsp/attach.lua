@@ -7,7 +7,6 @@ local M = {}
 local _lsp_merged_search = function()
   local conf = require('telescope.config').values
   local finders = require 'telescope.finders'
-  local make_entry = require 'telescope.make_entry'
   local pickers = require 'telescope.pickers'
   local entry_display = require 'telescope.pickers.entry_display'
 
@@ -26,7 +25,7 @@ local _lsp_merged_search = function()
       local uri = loc.uri or loc.targetUri
       local range = loc.range or loc.targetSelectionRange
       if uri and range then
-        local key = string.format("%s:%d:%d", uri, range.start.line, range.start.character)
+        local key = string.format('%s:%d:%d', uri, range.start.line, range.start.character)
         local current_prio = locations_seen[key] and priorities[locations_seen[key].type] or 0
         if priorities[type_label] > current_prio then
           locations_seen[key] = { loc = loc, type = type_label }
@@ -76,16 +75,16 @@ local _lsp_merged_search = function()
           results = items,
           entry_maker = function(entry)
             local displayer = entry_display.create {
-              separator = " ",
+              separator = ' ',
               items = { { width = 2 }, { width = 12 }, { remaining = true } },
             }
             local make_display = function(e)
-              local kind_hl = e.value.kind == "Definition" and "Function" or (e.value.kind == "Declaration" and "Type" or "Comment")
-              local icon = "▋"
+              local kind_hl = e.value.kind == 'Definition' and 'Function' or (e.value.kind == 'Declaration' and 'Type' or 'Comment')
+              local icon = '▋'
               return displayer {
                 { icon, kind_hl },
                 { e.value.kind, kind_hl },
-                string.format("%s:%d:%d %s", vim.fn.fnamemodify(e.value.filename, ":t"), e.value.lnum, e.value.col, vim.trim(e.value.text))
+                string.format('%s:%d:%d %s', vim.fn.fnamemodify(e.value.filename, ':t'), e.value.lnum, e.value.col, vim.trim(e.value.text)),
               }
             end
             return {
@@ -96,7 +95,7 @@ local _lsp_merged_search = function()
               lnum = entry.lnum,
               col = entry.col,
             }
-          end
+          end,
         },
         previewer = conf.qflist_previewer({}),
         sorter = conf.generic_sorter({}),
@@ -126,7 +125,6 @@ function M.on_attach(event)
     vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
   end
 
-  -- 核心导航
   map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
   map('gd', _lsp_merged_search, '[G]oto [D]efinition & References')
   map('grn', vim.lsp.buf.rename, '[R]e[n]ame')
@@ -140,18 +138,13 @@ function M.on_attach(event)
     return
   end
 
-  -- [Lua_ls Hotfix]
-  -- 强制在内存中补全 'vim' 全局变量配置，并主动通知服务器，绕过配置合并失败问题
   if client.name == 'lua_ls' then
     client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua or {}, {
-      diagnostics = {
-        globals = { 'vim' },
-      },
+      diagnostics = { globals = { 'vim' } },
     })
     client.notify('workspace/didChangeConfiguration', { settings = client.config.settings })
   end
 
-  -- 自动高亮 (CursorHold)
   if client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) and client.name ~= 'vtsls' then
     local highlight_group = vim.api.nvim_create_augroup('lsp-highlight-' .. event.buf, { clear = true })
     vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
@@ -166,7 +159,6 @@ function M.on_attach(event)
     })
   end
 
-  -- Inlay Hints
   if client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
     vim.lsp.inlay_hint.enable(true, { bufnr = event.buf })
     map('<leader>th', function()

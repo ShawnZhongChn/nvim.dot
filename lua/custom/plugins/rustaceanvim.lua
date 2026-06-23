@@ -9,40 +9,12 @@ return {
     ft = { 'rust' },
     init = function()
       vim.g.rustaceanvim = {
-        -- DAP 配置
         dap = {
           autoload_configurations = true,
         },
-
-        -- rust-analyzer 设置
         server = {
-          on_attach = function(client, bufnr)
-            -- K 映射为 Hover Actions
-            vim.keymap.set('n', 'K', function()
-              vim.cmd.RustLsp({ 'hover', 'actions' })
-            end, { buffer = bufnr, desc = 'Rust Hover Actions' })
-
-            vim.keymap.set('n', '<leader>ca', function()
-              vim.cmd.RustLsp('codeAction')
-            end, { buffer = bufnr, desc = 'Rust Code Action' })
-
-            vim.keymap.set('n', '<leader>dr', function()
-              vim.cmd.RustLsp('debuggables')
-            end, { buffer = bufnr, desc = 'Rust Debuggables' })
-
-            vim.keymap.set('n', '<leader>rr', function()
-              vim.cmd.RustLsp('runnables')
-            end, { buffer = bufnr, desc = 'Rust Runnables' })
-
-            vim.keymap.set('n', '<leader>rm', function()
-              vim.cmd.RustLsp('expandMacro')
-            end, { buffer = bufnr, desc = 'Rust Expand Macro' })
-
-            vim.keymap.set('n', '<leader>rp', function()
-              vim.cmd.RustLsp('parentModule')
-            end, { buffer = bufnr, desc = 'Rust Parent Module' })
+          on_attach = function(_, _)
           end,
-
           default_settings = {
             ['rust-analyzer'] = {
               cargo = {

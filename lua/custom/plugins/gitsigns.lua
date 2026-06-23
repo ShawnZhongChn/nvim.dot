@@ -71,31 +71,31 @@ local function _setup_buffer_keymaps(bufnr)
 
   -- 2. 核心操作 (Hunk Actions)
   -- Visual Mode
-  map('v', '<leader>hs', function()
+  map('v', '<leader>ghs', function()
     gitsigns.stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
   end, 'Git: Stage hunk (v)')
-  map('v', '<leader>hr', function()
+  map('v', '<leader>ghr', function()
     gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
   end, 'Git: Reset hunk (v)')
 
   -- Normal Mode
-  map('n', '<leader>hs', gitsigns.stage_hunk, 'Git: Stage hunk')
-  map('n', '<leader>hr', gitsigns.reset_hunk, 'Git: Reset hunk')
-  map('n', '<leader>hu', gitsigns.undo_stage_hunk, 'Git: Undo stage hunk')
-  map('n', '<leader>hS', gitsigns.stage_buffer, 'Git: Stage buffer')
-  map('n', '<leader>hR', gitsigns.reset_buffer, 'Git: Reset buffer')
+  map('n', '<leader>ghs', gitsigns.stage_hunk, 'Git: Stage hunk')
+  map('n', '<leader>ghr', gitsigns.reset_hunk, 'Git: Reset hunk')
+  map('n', '<leader>ghu', gitsigns.undo_stage_hunk, 'Git: Undo stage hunk')
+  map('n', '<leader>ghS', gitsigns.stage_buffer, 'Git: Stage buffer')
+  map('n', '<leader>ghR', gitsigns.reset_buffer, 'Git: Reset buffer')
 
   -- 3. 预览与查看 (Preview & Review)
-  map('n', '<leader>hp', gitsigns.preview_hunk, 'Git: Preview hunk')
-  map('n', '<leader>hb', function()
+  map('n', '<leader>ghp', gitsigns.preview_hunk, 'Git: Preview hunk')
+  map('n', '<leader>ghb', function()
     gitsigns.blame_line { full = true }
   end, 'Git: Blame line')
-  map('n', '<leader>tb', gitsigns.toggle_current_line_blame, 'Git: Toggle blame line')
-  map('n', '<leader>tD', gitsigns.preview_hunk_inline, 'Git: Toggle deleted preview')
+  map('n', '<leader>ghB', gitsigns.toggle_current_line_blame, 'Git: Toggle blame line')
+  map('n', '<leader>ghd', gitsigns.preview_hunk_inline, 'Git: Toggle deleted preview')
 
   -- 4. 差异对比 (Diff)
-  map('n', '<leader>hd', gitsigns.diffthis, 'Git: Diff vs Index')
-  map('n', '<leader>hD', function()
+  map('n', '<leader>ghD', gitsigns.diffthis, 'Git: Diff vs Index')
+  map('n', '<leader>ghE', function()
     gitsigns.diffthis '@'
   end, 'Git: Diff vs Last Commit')
 end

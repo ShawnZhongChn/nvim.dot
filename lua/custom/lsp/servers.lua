@@ -31,23 +31,9 @@ local _get_roots = function()
     lua = _root_dir({ 'init.lua', '.stylua.toml' }, false),
     markdown = _root_dir({ '.marksman.toml', '.git' }, false),
     yaml = _root_dir({ '.git' }, false),
-    frontend = _root_dir({
-      'package.json',
-      'tsconfig.json',
-      'jsconfig.json',
-      'vite.config.ts',
-      'vite.config.js',
-      '.git',
-    }, true),
+    frontend = _root_dir({ 'package.json', 'tsconfig.json', 'jsconfig.json', 'vite.config.ts', 'vite.config.js', '.git' }, true),
     biome = _root_dir({ 'biome.json', 'biome.jsonc', 'package.json', '.git' }, false),
-    tailwind = _root_dir({
-      'tailwind.config.ts',
-      'tailwind.config.js',
-      'postcss.config.ts',
-      'postcss.config.js',
-      'package.json',
-      '.git',
-    }, false),
+    tailwind = _root_dir({ 'tailwind.config.ts', 'tailwind.config.js', 'postcss.config.ts', 'postcss.config.js', 'package.json', '.git' }, false),
   }
 end
 
@@ -56,44 +42,14 @@ end
 function M.get_servers()
   local roots = _get_roots()
   return {
-    
-    -- YAML: 通过 SchemaStore 提供极致的 Kubernetes/Helm 补全
-    yamlls = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.yamlls', {
-      root_dir = roots.yaml,
-    }),
-
-    -- Lua: 配合 lazydev.nvim 获得极佳的插件开发体验
-    lua_ls = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.lua_ls', {
-      root_dir = roots.lua,
-    }),
-
-    -- Python: 类型检查引擎
-    basedpyright = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.basedpyright', {
-      root_dir = roots.python,
-    }),
-
-    -- Python: 极速 Linter & Formatter (LSP 模式)
-    ruff = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.ruff', {
-      root_dir = roots.python,
-    }),
-
-    -- Markdown: 文档导航与补全
+    yamlls = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.yamlls', { root_dir = roots.yaml }),
+    lua_ls = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.lua_ls', { root_dir = roots.lua }),
+    basedpyright = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.basedpyright', { root_dir = roots.python }),
+    ruff = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.ruff', { root_dir = roots.python }),
     marksman = { root_dir = roots.markdown },
-
-    -- TypeScript / React: 补全、跳转、重构、导入整理
-    vtsls = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.vtsls', {
-      root_dir = roots.frontend,
-    }),
-
-    -- Tailwind CSS: 类名补全、Hover 与校验
-    tailwindcss = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.tailwindcss', {
-      root_dir = roots.tailwind,
-    }),
-
-    -- Biome: 前端静态检查与格式化
-    biome = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.biome', {
-      root_dir = roots.biome,
-    }),
+    vtsls = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.vtsls', { root_dir = roots.frontend }),
+    tailwindcss = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.tailwindcss', { root_dir = roots.tailwind }),
+    biome = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.biome', { root_dir = roots.biome }),
   }
 end
 

@@ -17,7 +17,6 @@ end
 --- @return table
 local function _get_lazy_opts()
   return {
-    -- 自动从 custom/plugins 目录导入插件配置
     { import = 'custom.plugins' },
   }
 end
@@ -53,31 +52,22 @@ end
 
 --- 主初始化流程
 local function _init()
-  -- 0. 加载全局工具
   require 'globals'
 
-  -- 0.1 尽早禁用 netrw，避免目录打开时被原生浏览器接管
   vim.g.loaded_netrw = 1
   vim.g.loaded_netrwPlugin = 1
   vim.opt.termguicolors = true
 
-  -- 1. 加载核心配置 (确保 mapleader 在 Lazy 启动前设置)
   _load_core_config()
 
-  -- 2. 启动 Neovim RPC 服务 (用于 MCP Server)
-  -- 始终尝试启动固定路径的 Pipe，方便外部工具连接
-  pcall(vim.fn.serverstart, '/tmp/nvim')
+  pcall(vim.fn.serverstart, require('custom.config').get_value({ 'env', 'nvim_server_pipe' }, '/tmp/nvim'))
 
-  -- 3. 注入插件管理器路径
   local lazypath = _ensure_lazy_installed()
   vim.opt.rtp:prepend(lazypath)
 
-  -- 3. 启动插件系统
   require('lazy').setup(_get_lazy_opts())
 end
 
--- 执行初始化
 _init()
 
 -- vim: ts=2 sts=2 sw=2 et
-

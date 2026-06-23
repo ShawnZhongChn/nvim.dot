@@ -5,8 +5,8 @@ items:
   - slug: foundation-architecture
     description: 建立目标目录结构、模块边界、英文注释规范和迁移纪律，不改变用户可见行为
     depends_on: []
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-foundation-architecture
     minimal_loop: true
     produces_contracts:
       - plugin-spec-boundary
@@ -19,8 +19,8 @@ items:
     description: 建立 custom.config、环境变量覆盖和 feature flags，把个人路径与平台配置集中管理
     depends_on:
       - foundation-architecture
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-env-config-layer
     minimal_loop: false
     produces_contracts:
       - runtime-config
@@ -34,8 +34,8 @@ items:
     depends_on:
       - foundation-architecture
       - env-config-layer
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-shared-lib-extraction
     minimal_loop: false
     produces_contracts:
       - shared-library
@@ -49,8 +49,8 @@ items:
     description: 建立统一 keymap registry、which-key 权威分组和冲突治理规则
     depends_on:
       - foundation-architecture
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-keymap-taxonomy
     minimal_loop: false
     produces_contracts:
       - keymap-registry
@@ -65,8 +65,8 @@ items:
       - foundation-architecture
       - shared-lib-extraction
       - keymap-taxonomy
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-plugin-boundary-refactor
     minimal_loop: false
     produces_contracts: []
     consumes_contracts:
@@ -84,8 +84,8 @@ items:
       - foundation-architecture
       - shared-lib-extraction
       - keymap-taxonomy
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-lsp-platform-modernization
     minimal_loop: false
     produces_contracts:
       - lsp-platform
@@ -101,8 +101,8 @@ items:
     depends_on:
       - lsp-platform-modernization
       - env-config-layer
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-format-lint-resolver
     minimal_loop: false
     produces_contracts:
       - format-lint-resolver
@@ -119,8 +119,8 @@ items:
       - lsp-platform-modernization
       - format-lint-resolver
       - keymap-taxonomy
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-language-profile-registry
     minimal_loop: false
     produces_contracts:
       - language-profile
@@ -138,8 +138,8 @@ items:
       - foundation-architecture
       - keymap-taxonomy
       - env-config-layer
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-debug-test-platform
     minimal_loop: false
     produces_contracts:
       - debug-test-platform
@@ -155,8 +155,8 @@ items:
     depends_on:
       - language-profile-registry
       - debug-test-platform
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-python-workflow-profile
     minimal_loop: false
     produces_contracts: []
     consumes_contracts:
@@ -176,8 +176,8 @@ items:
       - language-profile-registry
       - format-lint-resolver
       - debug-test-platform
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-frontend-workflow-profile
     minimal_loop: false
     produces_contracts: []
     consumes_contracts:
@@ -196,8 +196,8 @@ items:
     depends_on:
       - language-profile-registry
       - debug-test-platform
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-rust-workflow-profile
     minimal_loop: false
     produces_contracts: []
     consumes_contracts:
@@ -215,8 +215,8 @@ items:
       - language-profile-registry
       - env-config-layer
       - plugin-boundary-refactor
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-markdown-workflow-profile
     minimal_loop: false
     produces_contracts:
       - markdown-obsidian-mode
@@ -235,8 +235,8 @@ items:
       - shared-lib-extraction
       - plugin-boundary-refactor
       - keymap-taxonomy
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-ui-decoupling
     minimal_loop: false
     produces_contracts:
       - ui-boundary
@@ -253,8 +253,8 @@ items:
     description: 将自研 statusline 拆成 context、components、render、palette，保留轻量和响应式原则
     depends_on:
       - ui-decoupling
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-statusline-componentization
     minimal_loop: false
     produces_contracts: []
     consumes_contracts:
@@ -270,8 +270,8 @@ items:
     depends_on:
       - ui-decoupling
       - lsp-platform-modernization
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-diagnostic-ui-unification
     minimal_loop: false
     produces_contracts: []
     consumes_contracts:
@@ -288,8 +288,8 @@ items:
       - ui-decoupling
       - statusline-componentization
       - diagnostic-ui-unification
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-modern-ui-evaluation
     minimal_loop: false
     produces_contracts: []
     consumes_contracts:
@@ -306,8 +306,8 @@ items:
       - foundation-architecture
       - env-config-layer
       - lsp-platform-modernization
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-version-governance
     minimal_loop: false
     produces_contracts:
       - version-governance
@@ -325,8 +325,8 @@ items:
       - language-profile-registry
       - debug-test-platform
       - version-governance
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-06-23-architecture-backfill-after-modernization
     minimal_loop: false
     produces_contracts: []
     consumes_contracts:

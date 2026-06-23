@@ -1,4 +1,9 @@
-local VAULT_PATH = '/Users/shawn/Documents/Personal/MyNotes'
+local config = require 'custom.config'
+local lib = require 'custom.lib'
+
+local VAULT_PATH = config.get_value({ 'env', 'obsidian_vault' }, '/Users/shawn/Documents/Personal/MyNotes')
+local OBSIDIAN_WORKSPACE = config.get_value({ 'env', 'obsidian_workspace' }, 'personal')
+local OBSIDIAN_PREVIEW_VAULT = config.get_value({ 'env', 'obsidian_preview_vault' }, 'MyNotes')
 local ROUGH_NOTES_DIR = '1 - Rough Notes'
 local TOPIC_PAGES_DIR = '3 - Tags'
 local DAILY_NOTES_DIR = 'dailies'
@@ -68,7 +73,7 @@ end
 
 local _ensure_workspace = function()
   if vim.fn.exists ':Obsidian' == 2 then
-    vim.cmd 'Obsidian workspace personal'
+    vim.cmd('Obsidian workspace ' .. OBSIDIAN_WORKSPACE)
   end
 end
 
@@ -127,7 +132,7 @@ local _get_obsidian_opts = function()
   return {
     workspaces = {
       {
-        name = 'personal',
+        name = OBSIDIAN_WORKSPACE,
         path = VAULT_PATH,
       },
     },
@@ -308,6 +313,7 @@ return {
   'obsidian-nvim/obsidian.nvim',
   version = '*',
   lazy = true,
+  enabled = config.is_enabled('obsidian'),
   keys = {
     {
       '<leader>on',
@@ -328,10 +334,9 @@ return {
 
         vim.fn.system { 'cp', src, tmp }
 
-        local url = string.format('obsidian://open?vault=%s&file=%s', _url_encode 'MyNotes', _url_encode('tmp-preview-' .. fname))
-        vim.fn.system { 'open', url }
+        local url = string.format('obsidian://open?vault=%s&file=%s', _url_encode(OBSIDIAN_PREVIEW_VAULT), _url_encode('tmp-preview-' .. fname))
+        lib.open_url(url)
 
-        -- buffer 关闭时删除
         local bufnr = vim.api.nvim_get_current_buf()
         vim.api.nvim_create_autocmd('BufDelete', {
           buffer = bufnr,
@@ -341,7 +346,6 @@ return {
           end,
         })
 
-        -- Neovim 退出时删除（兜底）
         vim.api.nvim_create_autocmd('VimLeavePre', {
           once = true,
           callback = function()

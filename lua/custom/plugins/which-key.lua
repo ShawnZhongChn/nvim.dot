@@ -49,25 +49,22 @@ local _get_wk_spec = function()
     return vim.g.have_nerd_font and glyph or nil
   end
 
-  return {
-    { '<leader>c', group = '[C]ode', mode = { 'n', 'x' }, icon = icon ' ' },
-    { '<leader>cd', group = '[D]iagnostic' },
-    { '<leader>cdd', group = 'Document Diagnostics' },
-    { '<leader>cdp', group = 'Project Diagnostics' },
-    { '<leader>cq', group = 'Quickfix List' },
-    { '<leader>cw', group = 'Workspace Diagnostics' },
-    { '<leader>d', group = '[D]ocument', icon = icon ' ' },
-    { '<leader>n', group = '[N]otices', icon = icon ' ' },
-    { '<leader>r', group = '[R]ename', icon = icon ' ' },
-    { '<leader>o', group = '[O]bsidian', icon = icon ' ' },
-    { '<leader>s', group = '[S]earch', icon = icon ' ' },
-    { '<leader>w', group = '[W]orkspace', icon = icon ' ' },
-    { '<leader>t', group = '[T]oggle', icon = icon ' ' },
-    { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' }, icon = icon ' ' },
-    { '<leader>f', group = '[F]iles / Oil', icon = icon '󰉓 ' },
-    { '<leader>l', group = '[L]azy', icon = icon '󰊢 ' },
-    { '<leader>fs', group = '[S]cratch Pad', icon = icon '󰄱 ' },
-  }
+  local keys = require 'custom.keymaps'
+  keys.setup_defaults()
+
+  local spec = keys.groups()
+  spec[#spec + 1] = { '<leader>c', group = '[C]ode', mode = { 'n', 'x' }, icon = icon ' ' }
+  spec[#spec + 1] = { '<leader>x', group = '[X] Diagnostics', icon = icon ' ' }
+  spec[#spec + 1] = { '<leader>g', group = '[G]it', icon = icon ' ' }
+  spec[#spec + 1] = { '<leader>gh', group = 'Git [H]unk', mode = { 'n', 'v' }, icon = icon ' ' }
+  spec[#spec + 1] = { '<leader>d', group = '[D]ocument', icon = icon ' ' }
+  spec[#spec + 1] = { '<leader>n', group = '[N]otices', icon = icon ' ' }
+  spec[#spec + 1] = { '<leader>r', group = '[R]ename', icon = icon ' ' }
+  spec[#spec + 1] = { '<leader>o', group = '[O]bsidian', icon = icon ' ' }
+  spec[#spec + 1] = { '<leader>s', group = '[S]earch', icon = icon ' ' }
+  spec[#spec + 1] = { '<leader>w', group = '[W]orkspace', icon = icon ' ' }
+  spec[#spec + 1] = { '<leader>t', group = '[T]oggle', icon = icon ' ' }
+  return spec
 end
 
 -------------------------------------------------------------------------------
