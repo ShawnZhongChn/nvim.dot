@@ -1,0 +1,338 @@
+roadmap: nvim-modernization
+created: 2026-06-22
+
+items:
+  - slug: foundation-architecture
+    description: 建立目标目录结构、模块边界、英文注释规范和迁移纪律，不改变用户可见行为
+    depends_on: []
+    status: planned
+    feature: null
+    minimal_loop: true
+    produces_contracts:
+      - plugin-spec-boundary
+      - commenting-readability
+    consumes_contracts: []
+    parallel_group: foundation
+    notes: 最小闭环；完成后 Neovim 应仍可启动，并具备承载后续重构的目录骨架和规范
+
+  - slug: env-config-layer
+    description: 建立 custom.config、环境变量覆盖和 feature flags，把个人路径与平台配置集中管理
+    depends_on:
+      - foundation-architecture
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts:
+      - runtime-config
+    consumes_contracts:
+      - commenting-readability
+    parallel_group: foundation
+    notes: 覆盖 Obsidian vault、Conda env、RPC pipe、system open/reveal、auto update policy
+
+  - slug: shared-lib-extraction
+    description: 将 _G.tools 拆为 icons/git/path/system/diagnostics/highlight 等显式 custom.lib 模块
+    depends_on:
+      - foundation-architecture
+      - env-config-layer
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts:
+      - shared-library
+    consumes_contracts:
+      - runtime-config
+      - commenting-readability
+    parallel_group: foundation
+    notes: 迁移期可保留 compatibility bridge，但新代码不得新增 _G.tools 直接依赖
+
+  - slug: keymap-taxonomy
+    description: 建立统一 keymap registry、which-key 权威分组和冲突治理规则
+    depends_on:
+      - foundation-architecture
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts:
+      - keymap-registry
+    consumes_contracts:
+      - commenting-readability
+    parallel_group: foundation
+    notes: 必须处理 <leader>cw、<leader>cdd、<leader>cdp、<leader>l*、<leader>t* 等冲突
+
+  - slug: plugin-boundary-refactor
+    description: 将复杂业务逻辑从 plugin spec 迁出，让 lua/custom/plugins 只保留 Lazy spec 与短 adapter
+    depends_on:
+      - foundation-architecture
+      - shared-lib-extraction
+      - keymap-taxonomy
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts: []
+    consumes_contracts:
+      - plugin-spec-boundary
+      - shared-library
+      - keymap-registry
+      - runtime-config
+      - commenting-readability
+    parallel_group: foundation
+    notes: 优先处理 status-line.lua、obsidian.lua、lazydocker.lua、dap.lua、debug.lua
+
+  - slug: lsp-platform-modernization
+    description: 重构 LSP 平台层，统一 native LSP config、capabilities、attach、diagnostics 和 server registry
+    depends_on:
+      - foundation-architecture
+      - shared-lib-extraction
+      - keymap-taxonomy
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts:
+      - lsp-platform
+    consumes_contracts:
+      - shared-library
+      - keymap-registry
+      - commenting-readability
+    parallel_group: platform
+    notes: 以 vim.lsp.config 和 vim.lsp.enable 为主路径，nvim-lspconfig 仅作为 server config provider
+
+  - slug: format-lint-resolver
+    description: 抽象 Conform 与 nvim-lint 策略为 project-aware formatter/linter resolver
+    depends_on:
+      - lsp-platform-modernization
+      - env-config-layer
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts:
+      - format-lint-resolver
+    consumes_contracts:
+      - runtime-config
+      - lsp-platform
+      - commenting-readability
+    parallel_group: platform
+    notes: Frontend 必须支持 Biome、ESLint、Prettier 项目检测式策略
+
+  - slug: language-profile-registry
+    description: 建立 custom/lang 的 Python、Frontend、Rust、Markdown、Lua workflow profile 机制
+    depends_on:
+      - lsp-platform-modernization
+      - format-lint-resolver
+      - keymap-taxonomy
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts:
+      - language-profile
+    consumes_contracts:
+      - lsp-platform
+      - format-lint-resolver
+      - keymap-registry
+      - commenting-readability
+    parallel_group: platform
+    notes: 先建立 profile 接口，不要求一次补齐所有语言能力
+
+  - slug: debug-test-platform
+    description: 统一 DAP 和 neotest 平台，收敛 dap.lua、debug.lua、rustaceanvim.lua 的 debug 边界
+    depends_on:
+      - foundation-architecture
+      - keymap-taxonomy
+      - env-config-layer
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts:
+      - debug-test-platform
+    consumes_contracts:
+      - runtime-config
+      - keymap-registry
+      - commenting-readability
+    parallel_group: platform
+    notes: nvim-dap setup 和 dap-ui listener 只能有一个权威入口
+
+  - slug: python-workflow-profile
+    description: 补齐 Python workflow，包括 basedpyright/ruff profile、venv、pytest/neotest-python 和 debugpy
+    depends_on:
+      - language-profile-registry
+      - debug-test-platform
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts: []
+    consumes_contracts:
+      - language-profile
+      - lsp-platform
+      - format-lint-resolver
+      - debug-test-platform
+      - runtime-config
+      - keymap-registry
+      - commenting-readability
+    parallel_group: language
+    notes: 支持 relaxed、strict、project-local typing policy；避免把个人偏好的降噪策略写死成唯一策略
+
+  - slug: frontend-workflow-profile
+    description: 补齐 React/Frontend workflow，包括 vtsls、Tailwind、Biome/ESLint/Prettier resolver、测试和脚本入口
+    depends_on:
+      - language-profile-registry
+      - format-lint-resolver
+      - debug-test-platform
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts: []
+    consumes_contracts:
+      - language-profile
+      - lsp-platform
+      - format-lint-resolver
+      - debug-test-platform
+      - runtime-config
+      - keymap-registry
+      - commenting-readability
+    parallel_group: language
+    notes: 不假设所有前端项目都是 Biome-first；需要支持 ESLint、Prettier、Vitest/Jest/Playwright 或 package scripts picker
+
+  - slug: rust-workflow-profile
+    description: 收敛 Rust workflow，包括 rustaceanvim、crates、clippy、codelldb、neotest 和 cargo command 入口
+    depends_on:
+      - language-profile-registry
+      - debug-test-platform
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts: []
+    consumes_contracts:
+      - language-profile
+      - lsp-platform
+      - debug-test-platform
+      - keymap-registry
+      - commenting-readability
+    parallel_group: language
+    notes: 保留 rustaceanvim 的优势，但统一 DAP UI、global debug keymaps 和 adapter 边界
+
+  - slug: markdown-workflow-profile
+    description: 分离普通 Markdown、render、preview、lint/format 与 Obsidian vault workflow
+    depends_on:
+      - language-profile-registry
+      - env-config-layer
+      - plugin-boundary-refactor
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts:
+      - markdown-obsidian-mode
+    consumes_contracts:
+      - language-profile
+      - runtime-config
+      - plugin-spec-boundary
+      - format-lint-resolver
+      - commenting-readability
+    parallel_group: language
+    notes: render-markdown.nvim 是 primary editor-internal reading enhancement；Obsidian 只在 vault mode 启用
+
+  - slug: ui-decoupling
+    description: 建立 custom/ui 边界，使 theme、statusline、diagnostic UI、Noice、picker、explorer 与 LSP/lang/debug/test 解耦
+    depends_on:
+      - shared-lib-extraction
+      - plugin-boundary-refactor
+      - keymap-taxonomy
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts:
+      - ui-boundary
+    consumes_contracts:
+      - shared-library
+      - plugin-spec-boundary
+      - keymap-registry
+      - runtime-config
+      - commenting-readability
+    parallel_group: ui
+    notes: 这是用户强调的关键目标；未来重写外观时不应触碰 LSP、lang、debug、test、core
+
+  - slug: statusline-componentization
+    description: 将自研 statusline 拆成 context、components、render、palette，保留轻量和响应式原则
+    depends_on:
+      - ui-decoupling
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts: []
+    consumes_contracts:
+      - ui-boundary
+      - shared-library
+      - runtime-config
+      - commenting-readability
+    parallel_group: ui
+    notes: statusline 不直接依赖 _G.tools，只依赖 lib 和 statusline-local modules
+
+  - slug: diagnostic-ui-unification
+    description: 统一 native diagnostics、tiny-inline-diagnostic、Trouble、Telescope diagnostics 和 statusline diagnostic count 的职责边界
+    depends_on:
+      - ui-decoupling
+      - lsp-platform-modernization
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts: []
+    consumes_contracts:
+      - ui-boundary
+      - lsp-platform
+      - keymap-registry
+      - commenting-readability
+    parallel_group: ui
+    notes: 目标是降低诊断噪音，并明确 inline、problem list、fuzzy diagnostics、status summary 各自职责
+
+  - slug: modern-ui-evaluation
+    description: 在地基稳定后评估 Snacks、mini、Noice、Telescope、Yazi 的现代化取舍
+    depends_on:
+      - ui-decoupling
+      - statusline-componentization
+      - diagnostic-ui-unification
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts: []
+    consumes_contracts:
+      - ui-boundary
+      - plugin-spec-boundary
+      - runtime-config
+      - commenting-readability
+    parallel_group: ui
+    notes: 只评估和局部替换，不做无目标大换血
+
+  - slug: version-governance
+    description: 明确 Neovim target、plugin pin、lazy-lock、Mason tools、Treesitter parser 和 blink.cmp stable 策略
+    depends_on:
+      - foundation-architecture
+      - env-config-layer
+      - lsp-platform-modernization
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts:
+      - version-governance
+    consumes_contracts:
+      - runtime-config
+      - lsp-platform
+      - commenting-readability
+    parallel_group: governance
+    notes: 建议 blink.cmp pin stable 1.*；确认 Mason auto_update、Treesitter auto_install、lazy-lock 是否作为提交资产
+
+  - slug: architecture-backfill-after-modernization
+    description: 在主要重构完成后回写 CodeStable architecture，记录实际落地的新架构
+    depends_on:
+      - ui-decoupling
+      - language-profile-registry
+      - debug-test-platform
+      - version-governance
+    status: planned
+    feature: null
+    minimal_loop: false
+    produces_contracts: []
+    consumes_contracts:
+      - ui-boundary
+      - language-profile
+      - debug-test-platform
+      - version-governance
+    parallel_group: governance
+    notes: 收尾 feature；把 roadmap 中已经落地的规划转为 architecture 现状文档
