@@ -11,6 +11,22 @@ local function _with_rounded_border(handler)
   end
 end
 
+function M.restart_current_buffer()
+  local clients = vim.lsp.get_clients { bufnr = 0 }
+  if vim.tbl_isempty(clients) then
+    vim.notify('No LSP clients attached to current buffer', vim.log.levels.WARN)
+    return
+  end
+
+  local restarted = {}
+  for _, client in ipairs(clients) do
+    if not restarted[client.name] then
+      restarted[client.name] = true
+      vim.cmd(('lsp restart %s'):format(client.name))
+    end
+  end
+end
+
 --- @Note 核心初始化逻辑
 function M.setup()
   vim.lsp.handlers['textDocument/hover'] = _with_rounded_border(vim.lsp.handlers.hover)
@@ -28,16 +44,20 @@ function M.setup()
     end, { desc = 'Open the Nvim LSP client log' })
   end
 
-  if vim.fn.exists(':LspRestart') == 0 then
-    vim.api.nvim_create_user_command('LspRestart', function()
-      if vim.tbl_isempty(vim.lsp.get_clients { bufnr = 0 }) then
-        vim.notify('No LSP clients attached to current buffer', vim.log.levels.WARN)
-        return
-      end
+  vim.api.nvim_create_user_command('LspRestart', function(opts)
+    if opts.args == '' then
+      M.restart_current_buffer()
+      return
+    end
 
-      vim.cmd 'lsp restart'
-    end, { desc = 'Restart LSP clients for current buffer' })
-  end
+    vim.cmd(('lsp restart %s'):format(opts.args))
+  end, {
+    desc = 'Restart LSP clients; defaults to current buffer when no server is specified',
+    nargs = '*',
+    complete = function()
+      return vim.tbl_map(function(client) return client.name end, vim.lsp.get_clients())
+    end,
+  })
 
   require('custom.lsp.diagnostics').setup()
 

@@ -19,7 +19,7 @@ end
 function M.setup_yazi()
   require('yazi').setup(M.yazi_opts())
   vim.keymap.set('n', '-', '<cmd>Yazi<cr>', { desc = 'Yazi: Open at current file' })
-  vim.keymap.set('n', '<space>-', '<cmd>Yazi toggle<cr>', { desc = 'Yazi: Toggle window' })
+  vim.keymap.set('n', '<space>-', '<cmd>Yazi<cr>', { desc = 'Yazi: Open at current file' })
   vim.keymap.set('n', '<leader>fy', '<cmd>Yazi cwd<cr>', { desc = 'Yazi: Open at CWD' })
 end
 

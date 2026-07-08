@@ -5,11 +5,10 @@ keys.register_many {
   { mode = 'n', lhs = '<leader>q', rhs = vim.diagnostic.setloclist, desc = 'Open diagnostic [Q]uickfix list' },
   { mode = 'n', lhs = '<leader>li', rhs = '<cmd>LspInfo<CR>', desc = 'LSP: Info' },
   { mode = 'n', lhs = '<leader>ll', rhs = '<cmd>LspLog<CR>', desc = 'LSP: Open Log' },
-  { mode = 'n', lhs = '<leader>lr', rhs = '<cmd>LspRestart<CR>', desc = 'LSP: Restart' },
+  { mode = 'n', lhs = '<leader>lr', rhs = function() require('custom.lsp').restart_current_buffer() end, desc = 'LSP: Restart Current Buffer' },
   { mode = 't', lhs = '<Esc><Esc>', rhs = '<C-\\><C-n>', desc = 'Exit terminal mode' },
   { mode = 'n', lhs = '<C-h>', rhs = '<C-w><C-h>', desc = 'Move focus to the left window' },
   { mode = 'n', lhs = '<C-l>', rhs = '<C-w><C-l>', desc = 'Move focus to the right window' },
   { mode = 'n', lhs = '<C-j>', rhs = '<C-w><C-j>', desc = 'Move focus to the lower window' },
   { mode = 'n', lhs = '<C-k>', rhs = '<C-w><C-k>', desc = 'Move focus to the upper window' },
 }
-
