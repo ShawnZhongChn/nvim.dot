@@ -7,6 +7,7 @@ M.python = require 'custom.lang.python'
 M.frontend = require 'custom.lang.frontend'
 M.rust = require 'custom.lang.rust'
 M.markdown = require 'custom.lang.markdown'
+M.java = require 'custom.lang.java'
 
 local PROFILE_BY_FILETYPE = {
   python = M.python,
@@ -19,10 +20,10 @@ local PROFILE_BY_FILETYPE = {
   jsonc = M.frontend,
   rust = M.rust,
   markdown = M.markdown,
+  java = M.java,
 }
 
-function M.setup()
-end
+function M.setup() end
 
 function M.profiles()
   return {
@@ -30,6 +31,7 @@ function M.profiles()
     M.frontend.profile(),
     M.rust.profile(),
     M.markdown.profile(),
+    M.java.profile(),
   }
 end
 

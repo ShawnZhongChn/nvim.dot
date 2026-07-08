@@ -33,6 +33,31 @@ local check_external_reqs = function()
   return true
 end
 
+local check_java_reqs = function()
+  vim.health.start 'Java development'
+
+  if vim.fn.executable 'java' == 1 then
+    vim.health.ok "Found executable: 'java'"
+  elseif vim.env.JAVA_HOME and vim.env.JAVA_HOME ~= '' then
+    vim.health.ok 'JAVA_HOME is set; jdtls can use this JDK runtime'
+  else
+    vim.health.warn 'Could not find a JDK. Run scripts/setup_java_sdkman.sh or install OpenJDK 21+ and set JAVA_HOME before starting jdtls.'
+  end
+
+  if vim.fn.executable 'mvn' == 1 then
+    vim.health.ok "Found executable: 'mvn'"
+  else
+    vim.health.warn 'Could not find Maven executable: mvn. Run scripts/setup_java_sdkman.sh, or use Maven wrapper projects via ./mvnw.'
+  end
+
+  local mason_jdtls = vim.fn.stdpath 'data' .. '/mason/packages/jdtls'
+  if vim.uv.fs_stat(mason_jdtls .. '/lombok.jar') then
+    vim.health.ok 'Found Mason jdtls Lombok agent jar'
+  else
+    vim.health.info 'Mason will install jdtls and its Lombok jar when auto_install_tools is enabled.'
+  end
+end
+
 return {
   check = function()
     vim.health.start 'kickstart.nvim'
@@ -48,5 +73,6 @@ return {
 
     check_version()
     check_external_reqs()
+    check_java_reqs()
   end,
 }

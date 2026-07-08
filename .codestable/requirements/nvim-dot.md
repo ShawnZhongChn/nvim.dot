@@ -5,7 +5,7 @@
 
 ## 1. 能力定位
 
-nvim.dot 是一套面向日常开发的 Neovim 配置，强调极简黑白视觉、高性能启动与模块化维护体验，并对 Python 与 Lua 开发进行深度优化。
+nvim.dot 是一套面向日常开发的 Neovim 配置，强调极简黑白视觉、高性能启动与模块化维护体验，并对 Python、Lua 与 Java 开发进行深度优化。
 
 ## 2. 核心能力
 
@@ -24,7 +24,15 @@ nvim.dot 是一套面向日常开发的 Neovim 配置，强调极简黑白视觉
 - 提供 Python docstring 等结构的 Treesitter/folding 增强。
 - 自动识别 `pyproject.toml`、`requirements.txt` 等 Python 项目根目录信号。
 
-### 2.3 核心工具链
+### 2.3 Java / Maven 开发环境
+
+- 使用 JDTLS 为 Maven Java 项目提供诊断、补全、hover、跳转定义 / 引用、rename、code action 与 organize imports。
+- 自动以 `pom.xml` / `mvnw` 识别 Java project root，避免单文件目录误判。
+- 通过 Mason 管理 `jdtls`、`google-java-format` 和 Spring Boot tools；通过 SDKMAN 引导安装 JDK 21+ 与 Maven。
+- 支持 Lombok javaagent 与 Spring Boot bundle，减少 Lombok / Spring 项目中的虚假诊断和导航失真。
+- Java 保存格式化使用 `google-java-format`，保留 LSP fallback。
+
+### 2.4 核心工具链
 
 - Lazy.nvim：插件管理。
 - Blink.cmp：补全引擎。

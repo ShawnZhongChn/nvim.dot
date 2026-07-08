@@ -40,7 +40,17 @@ function M.resolve(bufnr)
     return { formatters = { 'stylua' }, lsp_format = 'fallback' }
   end
 
-  local is_frontend = ft == 'javascript' or ft == 'javascriptreact' or ft == 'typescript' or ft == 'typescriptreact' or ft == 'css' or ft == 'json' or ft == 'jsonc'
+  if ft == 'java' then
+    return { formatters = { 'google-java-format' }, lsp_format = 'fallback' }
+  end
+
+  local is_frontend = ft == 'javascript'
+    or ft == 'javascriptreact'
+    or ft == 'typescript'
+    or ft == 'typescriptreact'
+    or ft == 'css'
+    or ft == 'json'
+    or ft == 'jsonc'
   if is_frontend then
     if _has_file(root, { 'biome.json', 'biome.jsonc' }) or _has_file(root, { 'package.json' }) then
       return { formatters = { 'biome' }, lsp_format = 'fallback' }
@@ -59,6 +69,7 @@ function M.formatters_by_ft()
   return {
     rust = { 'rustfmt' },
     lua = { 'stylua' },
+    java = { 'google-java-format' },
     javascript = { 'biome', stop_after_first = true },
     javascriptreact = { 'biome', stop_after_first = true },
     typescript = { 'biome', stop_after_first = true },
