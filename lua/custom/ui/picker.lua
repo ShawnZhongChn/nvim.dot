@@ -39,6 +39,7 @@ function M.keys(builtin)
     { '<leader>sh', builtin.help_tags, desc = '[S]earch [H]elp' },
     { '<leader>sk', builtin.keymaps, desc = '[S]earch [K]eymaps' },
     { '<leader>sf', builtin.find_files, desc = '[S]earch [F]iles' },
+    { '<leader>sF', function() builtin.find_files { hidden = true, no_ignore = true } end, desc = '[S]earch All [F]iles' },
     { '<leader>ss', builtin.builtin, desc = '[S]earch [S]elect Telescope' },
     { '<leader>sw', builtin.grep_string, desc = '[S]earch current [W]ord' },
     { '<leader>sg', builtin.live_grep, desc = '[S]earch by [G]rep' },
