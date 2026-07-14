@@ -1,0 +1,1 @@
+-- Add personal options here. ShawnVim defaults are loaded first.

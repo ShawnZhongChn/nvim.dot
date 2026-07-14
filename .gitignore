@@ -4,8 +4,6 @@ test.sh
 nvim
 
 spell/
-lazy-lock.json
-
 # Remote ignores
 tt.*
 .tests
