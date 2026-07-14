@@ -1,0 +1,93 @@
+feature: 2026-07-14-shawnvim-core-fork
+created: 2026-07-14
+
+steps:
+  - action: "Provenance骨架：固定源码snapshot、双hash manifest、精确JSON Pointer allowlist、逐source notice schema、LICENSE与UPSTREAM边界"
+    exit_signal: "每个导入/生成/排除资产可追溯；modified/unmodified与notice locator/marker可逐文件审计"
+    status: pending
+  - action: "Core transform：导入 runtime/query/vimdoc 并完成 shawnvim/ShawnVim namespace 与 identity 变换"
+    exit_signal: "所有 Lua 文件可解析，provenance allowlist 外无旧 namespace/path identity"
+    status: pending
+  - action: "Lifecycle/state：接通 local self-spec、0.1.0 version、schema、commands、events 与 health"
+    exit_signal: "resolved spec 是配置根本地 ShawnVim，运行时 version/schema/入口断言成立"
+    status: pending
+  - action: "ShawnVim history：建立独立 NEWS/CHANGELOG 并接通 news path"
+    exit_signal: "news/changelog 可由 core 打开，只记录 ShawnVim 0.1.0 分叉事实和后续历史"
+    status: pending
+  - action: "Audit tooling：交付identity/source-manifest/syntax helpers，定义JSON Pointer allowlist、fixed cache/cache-hit、notice/evidence schema与退出码"
+    exit_signal: "三个helper在固定输入下可执行、失败非零；cache commit/tree、逐file notice和JSON evidence均可验证"
+    status: pending
+  - action: "Core smoke：用test-only _with_probe_for_test驱动真实shawnvim.plugins import；lazy.nvim覆盖clone/clean cache-hit/错OID/dirty cache"
+    exit_signal: "probe/cache均可靠恢复；core-minit.json记录四分支expected/actual OID与clean状态；headless错误非交互非零且生产不设置test seam"
+    status: pending
+  - action: "审计收口：运行 manifest、identity、Apache notice、syntax 与结构 diff review，并做 supporting tool preflight"
+    exit_signal: "全部核心命令通过，旧真实 init/custom/core 未被删除或接管；Stylua/Selene 缺失时有明确 supporting 记录"
+    status: pending
+
+checks:
+  - item: "require('shawnvim').setup(opts) 是核心公开入口"
+    source: 名词契约
+    status: pending
+  - item: "local self-spec 使用 shawnvim_root test seam 或 stdpath config production root"
+    source: 名词契约
+    status: pending
+  - item: "release version 0.1.0 与整数 JSON schema 分离"
+    source: 名词契约
+    status: pending
+  - item: "固定 snapshot → manifest → transform → minit 的线性 fail-closed 流程"
+    source: 编排骨架
+    status: pending
+  - item: "provenance allowlist 外不得残留旧 namespace/identity"
+    source: 流程级约束
+    status: pending
+  - item: "UPSTREAM-SOURCE.json仅允许/source_repository、/source_files/*/source、/excluded_files/*/source包含上游identity，destination/transform/generated/notice不豁免"
+    source: 流程级约束
+    status: pending
+  - item: "lua/shawnvim 与 shawnvim.plugins/extras 是运行时挂载点"
+    source: 挂载点
+    status: pending
+  - item: "ShawnExtras、ShawnHealth、events/state names 是用户入口"
+    source: 挂载点
+    status: pending
+  - item: "不迁移旧个人行为、不切换真实 init、不新增 upstream remote"
+    source: 范围守护
+    status: pending
+  - item: "resolved specs 不包含 LazyVim repository 或 starter"
+    source: 验收场景
+    status: pending
+  - item: "source manifest双hash、逐source Apache notice、fixed cache/evidence、news history和真实import的injected version error path可验证"
+    source: 验收场景
+    status: pending
+  - item: "fixed lazy.nvim harness覆盖cache-miss、正确cache-hit、错误OID和dirty cache fail-closed，并输出expected/actual OID"
+    source: 验收场景
+    status: pending
+
+dod:
+  commands:
+    - id: CMD-001
+      command: "nvim -l tests/minit.lua --minitest"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-002
+      command: "scripts/audit-identity --json .tests/evidence/core-identity.json"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-003
+      command: "scripts/audit-source-manifest --source-cache .tests/upstream/lazyvim-source --fetch-missing --core . --manifest UPSTREAM-SOURCE.json --json .tests/evidence/core-source.json"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-004
+      command: "nvim -l scripts/check-lua-syntax.lua"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-005
+      command: "stylua --check lua tests"
+      core: false
+      failure_handling: document-baseline
+    - id: CMD-006
+      command: "selene lua tests"
+      core: false
+      failure_handling: document-baseline
+  evidence_required: [command_output, diff_summary, manifest, resolved_specs, minit_json, notice_audit, source_cache_identity, audit_json, supporting_tool_preflight]
+  cleanliness:
+    debug_output: forbidden

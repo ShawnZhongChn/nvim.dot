@@ -1,0 +1,54 @@
+roadmap: shawnvim-fork
+status: ready-to-dispatch
+baseline_ref: 6552a4d0304f6b1378b5a75f06a1b0062f8f2249
+driver_kind: native
+driver_id: /root/shawnvim_goal_driver
+handoff_reason: ""
+handoff_next: ""
+current_feature_index: 0
+features:
+  - slug: legacy-config-snapshot
+    roadmap_item: legacy-config-snapshot
+    feature_dir: .codestable/features/2026-07-14-legacy-config-snapshot
+    design: .codestable/features/2026-07-14-legacy-config-snapshot/legacy-config-snapshot-design.md
+    checklist: .codestable/features/2026-07-14-legacy-config-snapshot/legacy-config-snapshot-checklist.yaml
+    review: .codestable/features/2026-07-14-legacy-config-snapshot/legacy-config-snapshot-review.md
+    qa: .codestable/features/2026-07-14-legacy-config-snapshot/legacy-config-snapshot-qa.md
+    acceptance: .codestable/features/2026-07-14-legacy-config-snapshot/legacy-config-snapshot-acceptance.md
+    status: implementing
+  - slug: shawnvim-core-fork
+    roadmap_item: shawnvim-core-fork
+    feature_dir: .codestable/features/2026-07-14-shawnvim-core-fork
+    design: .codestable/features/2026-07-14-shawnvim-core-fork/shawnvim-core-fork-design.md
+    checklist: .codestable/features/2026-07-14-shawnvim-core-fork/shawnvim-core-fork-checklist.yaml
+    review: .codestable/features/2026-07-14-shawnvim-core-fork/shawnvim-core-fork-review.md
+    qa: .codestable/features/2026-07-14-shawnvim-core-fork/shawnvim-core-fork-qa.md
+    acceptance: .codestable/features/2026-07-14-shawnvim-core-fork/shawnvim-core-fork-acceptance.md
+    status: pending
+  - slug: shawnvim-development-docs
+    roadmap_item: shawnvim-development-docs
+    feature_dir: .codestable/features/2026-07-14-shawnvim-development-docs
+    design: .codestable/features/2026-07-14-shawnvim-development-docs/shawnvim-development-docs-design.md
+    checklist: .codestable/features/2026-07-14-shawnvim-development-docs/shawnvim-development-docs-checklist.yaml
+    review: .codestable/features/2026-07-14-shawnvim-development-docs/shawnvim-development-docs-review.md
+    qa: .codestable/features/2026-07-14-shawnvim-development-docs/shawnvim-development-docs-qa.md
+    acceptance: .codestable/features/2026-07-14-shawnvim-development-docs/shawnvim-development-docs-acceptance.md
+    status: pending
+  - slug: shawnvim-config-cutover
+    roadmap_item: shawnvim-config-cutover
+    feature_dir: .codestable/features/2026-07-14-shawnvim-config-cutover
+    design: .codestable/features/2026-07-14-shawnvim-config-cutover/shawnvim-config-cutover-design.md
+    checklist: .codestable/features/2026-07-14-shawnvim-config-cutover/shawnvim-config-cutover-checklist.yaml
+    review: .codestable/features/2026-07-14-shawnvim-config-cutover/shawnvim-config-cutover-review.md
+    qa: .codestable/features/2026-07-14-shawnvim-config-cutover/shawnvim-config-cutover-qa.md
+    acceptance: .codestable/features/2026-07-14-shawnvim-config-cutover/shawnvim-config-cutover-acceptance.md
+    status: pending
+  - slug: shawnvim-release-hardening
+    roadmap_item: shawnvim-release-hardening
+    feature_dir: .codestable/features/2026-07-14-shawnvim-release-hardening
+    design: .codestable/features/2026-07-14-shawnvim-release-hardening/shawnvim-release-hardening-design.md
+    checklist: .codestable/features/2026-07-14-shawnvim-release-hardening/shawnvim-release-hardening-checklist.yaml
+    review: .codestable/features/2026-07-14-shawnvim-release-hardening/shawnvim-release-hardening-review.md
+    qa: .codestable/features/2026-07-14-shawnvim-release-hardening/shawnvim-release-hardening-qa.md
+    acceptance: .codestable/features/2026-07-14-shawnvim-release-hardening/shawnvim-release-hardening-acceptance.md
+    status: pending

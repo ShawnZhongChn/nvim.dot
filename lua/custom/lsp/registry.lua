@@ -15,7 +15,6 @@ local function _servers()
     frontend = roots.make({ 'package.json', 'tsconfig.json', 'jsconfig.json', 'vite.config.ts', 'vite.config.js', '.git' }, true),
     biome = roots.make({ 'biome.json', 'biome.jsonc', 'package.json', '.git' }, false),
     tailwind = roots.make({ 'tailwind.config.ts', 'tailwind.config.js', 'postcss.config.ts', 'postcss.config.js', 'package.json', '.git' }, false),
-    java = roots.make({ 'pom.xml', 'mvnw', '.git' }, true),
   }
 
   return {
@@ -27,7 +26,6 @@ local function _servers()
     vtsls = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.vtsls', { root_dir = root.frontend }),
     tailwindcss = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.tailwindcss', { root_dir = root.tailwind }),
     biome = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.biome', { root_dir = root.biome }),
-    jdtls = vim.tbl_deep_extend('force', require 'custom.lsp.server_settings.jdtls', { root_dir = root.java }),
   }
 end
 
@@ -41,7 +39,6 @@ local function _mason_packages()
     vtsls = 'vtsls',
     tailwindcss = 'tailwindcss-language-server',
     biome = 'biome',
-    jdtls = 'jdtls',
   }
 end
 
@@ -73,6 +70,7 @@ function M.ensure_installed()
     'markdownlint-cli2',
     'prettierd',
     'prettier',
+    'jdtls',
     'google-java-format',
     'vscode-spring-boot-tools',
   })

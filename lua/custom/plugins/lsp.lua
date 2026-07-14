@@ -8,6 +8,7 @@ return {
     { 'williamboman/mason.nvim', opts = {} },
     'williamboman/mason-lspconfig.nvim',
     'WhoIsSethDaniel/mason-tool-installer.nvim',
+    'mfussenegger/nvim-jdtls',
     'b0o/SchemaStore.nvim',
     'towolf/vim-helm',
     'yioneko/nvim-vtsls',

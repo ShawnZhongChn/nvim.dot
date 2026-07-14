@@ -1,6 +1,8 @@
 --- @module custom.lsp.server_settings.jdtls
 --- Java language server settings for Maven/Spring/Lombok projects.
 
+local M = {}
+
 local function _mason_package_path(package)
   return vim.fn.stdpath 'data' .. '/mason/packages/' .. package
 end
@@ -14,7 +16,7 @@ local function _jdtls_cache_dir()
 end
 
 local function _jdtls_workspace_dir(root_dir)
-  local project = root_dir and vim.fn.fnamemodify(root_dir, ':p:h:t') or 'default'
+  local project = root_dir and vim.fs.basename(vim.fs.normalize(root_dir)) or 'default'
   return _jdtls_cache_dir() .. '/workspace/' .. project
 end
 
@@ -43,11 +45,26 @@ local function _java_home_runtime()
   end
 end
 
-local function _jdtls_command(dispatchers, config)
+local function _project_root(bufnr)
+  local path = vim.api.nvim_buf_get_name(bufnr)
+  local root = vim.fs.root(bufnr, { 'pom.xml', 'mvnw', '.git' })
+
+  if root then
+    return root
+  end
+
+  if path ~= '' then
+    return vim.fs.dirname(vim.fs.normalize(path))
+  end
+
+  return vim.fn.getcwd()
+end
+
+local function _jdtls_command(root_dir)
   local cmd = {
     _existing_file(_mason_bin_path 'jdtls') or 'jdtls',
     '-data',
-    _jdtls_workspace_dir(config.root_dir),
+    _jdtls_workspace_dir(root_dir),
   }
 
   local env_args = vim.split(vim.env.JDTLS_JVM_ARGS or '', '%s+', { trimempty = true })
@@ -70,11 +87,7 @@ local function _jdtls_command(dispatchers, config)
     end)
   end
 
-  return vim.lsp.rpc.start(cmd, dispatchers, {
-    cwd = config.cmd_cwd,
-    env = config.cmd_env,
-    detached = config.detached,
-  })
+  return cmd
 end
 
 local runtimes = {}
@@ -83,71 +96,87 @@ if runtime then
   table.insert(runtimes, runtime)
 end
 
-return {
-  cmd = _jdtls_command,
-  filetypes = { 'java' },
-  settings = {
-    java = {
-      configuration = {
-        runtimes = runtimes,
-        updateBuildConfiguration = 'interactive',
-      },
-      maven = {
-        downloadSources = true,
-      },
-      import = {
-        generatesMetadataFilesAtProjectRoot = false,
+--- @param bufnr integer|nil
+--- @return table
+function M.make_config(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  local root_dir = _project_root(bufnr)
+  local jdtls = require 'jdtls'
+
+  local extended_client_capabilities = vim.deepcopy(jdtls.extendedClientCapabilities)
+  extended_client_capabilities.resolveAdditionalTextEditsSupport = true
+
+  return {
+    cmd = _jdtls_command(root_dir),
+    root_dir = root_dir,
+    capabilities = require('custom.lsp.capabilities').make(),
+    filetypes = { 'java' },
+    settings = {
+      java = {
+        configuration = {
+          runtimes = runtimes,
+          updateBuildConfiguration = 'interactive',
+        },
         maven = {
+          downloadSources = true,
+        },
+        import = {
+          generatesMetadataFilesAtProjectRoot = false,
+          maven = {
+            enabled = true,
+          },
+          gradle = {
+            enabled = false,
+          },
+        },
+        completion = {
+          favoriteStaticMembers = {
+            'org.junit.jupiter.api.Assertions.*',
+            'org.mockito.Mockito.*',
+            'org.springframework.test.web.servlet.result.MockMvcResultMatchers.*',
+          },
+          importOrder = { 'java', 'javax', 'jakarta', 'org', 'com' },
+        },
+        sources = {
+          organizeImports = {
+            starThreshold = 9999,
+            staticStarThreshold = 9999,
+          },
+        },
+        saveActions = {
+          organizeImports = true,
+        },
+        format = {
+          enabled = true,
+          comments = {
+            enabled = true,
+          },
+        },
+        referencesCodeLens = {
           enabled = true,
         },
-        gradle = {
-          enabled = false,
-        },
-      },
-      completion = {
-        favoriteStaticMembers = {
-          'org.junit.jupiter.api.Assertions.*',
-          'org.mockito.Mockito.*',
-          'org.springframework.test.web.servlet.result.MockMvcResultMatchers.*',
-        },
-        importOrder = { 'java', 'javax', 'jakarta', 'org', 'com' },
-      },
-      sources = {
-        organizeImports = {
-          starThreshold = 9999,
-          staticStarThreshold = 9999,
-        },
-      },
-      saveActions = {
-        organizeImports = true,
-      },
-      format = {
-        enabled = true,
-        comments = {
+        implementationsCodeLens = {
           enabled = true,
         },
+        inlayHints = {
+          parameterNames = {
+            enabled = 'all',
+          },
+        },
       },
-      referencesCodeLens = {
-        enabled = true,
-      },
-      implementationsCodeLens = {
-        enabled = true,
-      },
-      inlayHints = {
-        parameterNames = {
-          enabled = 'all',
+      spring = {
+        boot = {
+          validation = {
+            enabled = true,
+          },
         },
       },
     },
-    spring = {
-      boot = {
-        validation = {
-          enabled = true,
-        },
-      },
+    init_options = {
+      bundles = _spring_boot_bundles(),
+      extendedClientCapabilities = extended_client_capabilities,
     },
-  },
-  init_options = {
-    bundles = _spring_boot_bundles(),
-  },
-}
+  }
+end
+
+return M

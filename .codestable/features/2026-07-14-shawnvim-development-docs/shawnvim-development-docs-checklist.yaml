@@ -1,0 +1,69 @@
+feature: 2026-07-14-shawnvim-development-docs
+created: 2026-07-14
+
+steps:
+  - action: "Snapshot inventory：固定 docs commit，筛选 138 Markdown，记录 source hashes 与三个 YAML 排除项"
+    exit_signal: "source_files 恰好 138 条且全为 .md，excluded_upstream_files 恰好三份 category YAML"
+    status: pending
+  - action: "Structural transform：把 ESM/JSX/Tabs/admonition/站点资产引用转换为普通 Markdown，建立 group/branch 映射"
+    exit_signal: "code-aware residual为零，125个文件/487 groups/975 branches 的context、顺序、label一致，wrapper-only正文hash相等"
+    status: pending
+  - action: "ShawnVim calibration：用受限枚举、逐步input/output hash和selector precondition校准identity、相对md links/GitHub anchors与core paths"
+    exit_signal: "无whole-file replacement；operations从固定source重放到destination，slugger fixtures和core ancestor/manifest/tree digest audit通过"
+    status: pending
+  - action: "History/provenance：byte-identical移动upstream news，生成working news、UPSTREAM-DOCS、README license section、core身份与destination hashes"
+    exit_signal: "news bytes相等；UPSTREAM-DOCS与README双入口明确rights边界；138 source + 1 generated=139且core身份可重放"
+    status: pending
+  - action: "文档验证：按精确 CLI fetch/cache固定 commit，运行 full audit 并阅读五类代表页面"
+    exit_signal: "fixed-source replay/139目标Markdown全量 gate通过，五类页面分支内容和core语义人工核对通过"
+    status: pending
+
+checks:
+  - item: "SOURCE.json 的 source_files 恰好映射 138 个 Markdown"
+    source: 名词契约
+    status: pending
+  - item: "source/generated/excluded/site_assets 四类资产边界互斥"
+    source: 名词契约
+    status: pending
+  - item: "固定 snapshot → structural transform → calibration → provenance → audit"
+    source: 编排骨架
+    status: pending
+  - item: "Tabs group/branch structural hash bijection、受限operation replay、GitHub slugger fixtures和code-aware residual scan都必须通过"
+    source: 流程级约束
+    status: pending
+  - item: "docs/development/0.1.0、SOURCE.json、UPSTREAM-DOCS、README license section、audit CLI是挂载点"
+    source: 挂载点
+    status: pending
+  - item: "不复制任何非 Markdown、站点工程或 logo"
+    source: 范围守护
+    status: pending
+  - item: "不自动把文档置于 Apache-2.0，也不伪造上游历史"
+    source: 范围守护
+    status: pending
+  - item: "upstream news只允许move-verbatim且bytes/hash相等；calibrated core commit是当前祖先且manifest/tree digest不漂移"
+    source: 验收场景
+    status: pending
+  - item: "所有本地链接/资产/core paths 存在且 working docs 无旧安装指令"
+    source: 验收场景
+    status: pending
+  - item: "代表性页面保持 Tabs 分支语义且普通 Markdown 可读"
+    source: 验收场景
+    status: pending
+
+dod:
+  commands:
+    - id: CMD-001
+      command: "scripts/audit-docs --source-cache .tests/upstream/lazyvim-docs --fetch-missing --docs docs/development/0.1.0 --manifest docs/development/0.1.0/SOURCE.json --core . --json .tests/evidence/docs.json"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-002
+      command: "scripts/audit-identity --json .tests/evidence/docs-identity.json"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-003
+      command: "git diff --check"
+      core: false
+      failure_handling: fix-or-block
+  evidence_required: [command_output, diff_summary, manifest, audit_json, manual_review]
+  cleanliness:
+    debug_output: forbidden

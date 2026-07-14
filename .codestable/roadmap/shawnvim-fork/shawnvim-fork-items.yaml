@@ -1,0 +1,48 @@
+roadmap: shawnvim-fork
+created: 2026-07-14
+
+items:
+  - slug: legacy-config-snapshot
+    description: 保存当前本地提交和未提交修改为可恢复 commit，并建立替换前的 annotated legacy tag
+    depends_on: []
+    status: in-progress
+    feature: 2026-07-14-legacy-config-snapshot
+    minimal_loop: false
+    notes: tag 是旧运行时删除前包含完整 legacy runtime/worktree 的命名 snapshot；首次 destructive commit须证明其为受保护祖先
+
+  - slug: shawnvim-core-fork
+    description: 按 manifest 导入固定源码快照，完成 ShawnVim 0.1.0 核心、本地 self-spec、独立历史、Apache 归属和最小 smoke 分叉
+    depends_on:
+      - legacy-config-snapshot
+    status: in-progress
+    feature: 2026-07-14-shawnvim-core-fork
+    minimal_loop: true
+    notes: 独占 minit self-spec、0.1.0 运行时版本和 news path smoke；同批替换 LICENSE.md、落地 LICENSE/UPSTREAM，并采用上游开发配置
+
+  - slug: shawnvim-development-docs
+    description: 接收官方文档快照中的 138 个 Markdown 文件，建立逐文件来源清单并适配为 ShawnVim 0.1.0 版本化开发文档
+    depends_on:
+      - shawnvim-core-fork
+    status: in-progress
+    feature: 2026-07-14-shawnvim-development-docs
+    minimal_loop: false
+    notes: owner 已确认转载权；仅复制 138 Markdown、不复制 category YAML；许可边界单列；双 hash + Tabs 分支映射；保真隔离 news；无 MDX/坏链接 gate；不导入站点/logo 工程
+
+  - slug: shawnvim-config-cutover
+    description: 以 ShawnVim bootstrap 和空白用户覆盖层替换真实 Neovim 启动链，并移除旧配置运行时
+    depends_on:
+      - shawnvim-core-fork
+    status: in-progress
+    feature: 2026-07-14-shawnvim-config-cutover
+    minimal_loop: false
+    notes: 不迁移旧个人行为；验收时更新 attention/requirements/architecture，取消 lazy-lock ignore 并提交 lockfile
+
+  - slug: shawnvim-release-hardening
+    description: 适配 core smoke 之外的完整测试与独立 CI，完成 clean-room、审计及 branch/legacy/v0.1.0 tags 同步
+    depends_on:
+      - shawnvim-config-cutover
+      - shawnvim-development-docs
+    status: in-progress
+    feature: 2026-07-14-shawnvim-release-hardening
+    minimal_loop: false
+    notes: CI覆盖v0.11.2/stable精确candidate SHA；candidate建annotated v0.1.0，publish证据进入仅改.codestable的admin commit；不建GitHub Release；分别核对远端branch及两tags的object/peeled OID
