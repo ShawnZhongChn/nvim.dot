@@ -102,7 +102,7 @@ round: 1
 
 - 已知限制：未实机覆盖 Neovim 0.11.2；当前目标宿主为已验证的 0.12.4。
 - 已知限制：Rust matcher 慢网/下载失败重试未做故障注入；正常下载、15 秒等待与 health 正向证据已通过。
-- 操作交接：日常 `~/.local/share/nvim` 在 feature 合并前故意保持 v0.14.2；合并后需对日常 runtime 执行精确 Lazy restore/update，再复验 checkout 为 v1.10.2。
+- 操作交接：feature 已通过 merge commit `0c5ffe3` 合入 `master`；日常 `~/.local/share/nvim/lazy/blink.cmp` 已执行精确 Lazy restore，并复验为 v1.10.2 commit `78336bc89ee5365633bcf754d93df01678b5c08f`。
 - 后续优化/顺手发现：none。
 
 ## 10. 最终审计
@@ -129,4 +129,5 @@ round: 1
 - 完整工作区复核：tracked 与 untracked 均属于 feature；仓库根目录无 `Untitled`/fixture；临时 XDG、tarball、venv/output 已删除。
 - diff 清洁度：通过；无 debug、TODO/FIXME、注释掉代码、无关 lock key 或方案外 production 文件。
 - 知识沉淀出口：1 条 attention 候选、2 条 learning 候选已在第 8 节分流。
-- 结论：技术验收通过；等待用户终审后进入 scoped commit/finish/merge，并在 merge 后同步日常 blink checkout。
+- 合并后性能抽查：同机 warm headless load（含 Rust matcher ready）各 5 次，v0.14.2 平均 `0.142s`，v1.10.2 平均 `0.132s`；短测未发现性能回退。
+- 结论：技术验收、scoped commit、finish、merge 与日常 runtime 同步均已完成；最终 merge commit 为 `0c5ffe3`。
