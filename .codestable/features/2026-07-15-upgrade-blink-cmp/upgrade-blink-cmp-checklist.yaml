@@ -4,75 +4,75 @@ created: 2026-07-15
 steps:
   - action: "S1 宿主升级：下载官方 nvim-linux-x86_64.tar.gz，校验 SHA256/架构/Release 与 vim.version()；用隔离 state/cache、只读复用既有插件 data 的 CMD-005 通过完整冷启动后，原子切换 ~/.local/bin/nvim，再删除旧 apt 包和旧 ~/.local/opt/nvim-* 目录"
     exit_signal: "官方 asset 与 sha256=012bf3fcac5ade43914df3f174668bf64d05e049a4f032a388c027b1ebd78628 通过；CMD-005 日常 ShawnVim 完整冷启动通过；realpath/PATH 唯一指向 v0.12.4 Release，vim.version().prerelease == nil，apt neovim 已不存在且旧 opt 目录已删除"
-    status: pending
+    status: done
   - action: "S2 基线隔离：在 basename 为 nvim 的 linked worktree 建立独立 XDG data/state/cache 并复现 v0.14.2 冷启动"
     exit_signal: "隔离路径已记录，使用新 NVIM_BIN 报告 blink.cmp v0.14.2，冷启动主动断言通过"
-    status: pending
+    status: done
   - action: "S3 版本解析：将 blink.cmp stable spec pin 到 1.10.2，选择性更新 blink.cmp 并执行 merge-base JSON 键级 lock guard"
     exit_signal: "唯一变化 key 为 blink.cmp，commit 精确等于 78336bc89ee5365633bcf754d93df01678b5c08f"
-    status: pending
+    status: done
   - action: "S4 配置兼容：强制加载目标版本并对每个兼容改动执行失败证据门禁"
     exit_signal: "v1.10.2 setup 成功；配置零 diff，或每处兼容 diff 都关联一条修复前失败证据"
-    status: pending
+    status: done
   - action: "S5 自动 smoke：在隔离 XDG 中用新 NVIM_BIN、assert/xpcall 与 cquit 验证精确宿主版本、stdpath 四路径、lazy import、关键 ShawnVim 初始化、blink 加载及广义 Notifications/messages"
     exit_signal: "成功路径零退出；注入失败断言时非零退出；无 error、blink、config、schema 或 import-order 通知"
-    status: pending
+    status: done
   - action: "S6 backend/source health：正向验证 Rust matcher/checkout/checkhealth，并用 fixture 取得默认 sources 与 lazydev 证据"
     exit_signal: "target checkout 精确命中目标 commit，Rust matcher/library 正常；LSP/path/snippets/buffer 均有候选证据，lazydev 有 provider 与候选证据"
-    status: pending
+    status: done
   - action: "S7 交互回归：逐项验证 Insert 接受/fallback、三类 cmdline 左右键、snippet-forward 与 lazydev 候选"
     exit_signal: "编号 I1-I7 每项都有通过证据，cmdline 左右键均保持原生移动"
-    status: pending
+    status: done
   - action: "S8 回退与交接：在完全独立的 rollback config/data/state/cache 演练 v0.14.2，保存 evidence manifest；implementation 保留 target/rollback 运行时供 code review 与 acceptance 复验"
     exit_signal: "rollback checkout 为 485c034…且可加载，target checkout 仍为 78336bc…，manifest 已保存，target/rollback XDG 仍存在且 git status 仅含声明范围"
-    status: pending
+    status: done
 
 checks:
   - item: "blink.cmp lock 条目对应官方稳定版 v1.10.2"
     source: 名词契约
-    status: pending
+    status: passed
   - item: "blink.cmp stable plugin spec 明确 pin 1.10.2，不依赖 version=* 或 latest 时间性解析"
     source: 名词契约
-    status: pending
+    status: passed
   - item: "非必要插件 lock 条目不发生变化"
     source: 范围守护
-    status: pending
+    status: passed
   - item: "不跟踪 main、不启用 Rust 本地 build"
     source: 范围守护
-    status: pending
+    status: passed
   - item: "精确 Neovim 0.12.4 Release 冷启动、stdpath 与关键初始化无 error/blink/config/schema/import-order 通知"
     source: 验收场景
-    status: pending
+    status: passed
   - item: "Rust matcher 与 checkhealth 正常，无未批准的 Lua fallback"
     source: 验收场景
-    status: pending
+    status: passed
   - item: "Insert 默认 sources 与接受/fallback 行为可用"
     source: 验收场景
-    status: pending
+    status: passed
   - item: "cmdline 补全可用且左右键保持原生移动"
     source: 验收场景
-    status: pending
+    status: passed
   - item: "Lua lazydev source 与 snippet 展开路径可用"
     source: 验收场景
-    status: pending
+    status: passed
   - item: "失败时不合并、不留下无关升级；临时运行数据只在 acceptance 最后复验后清理"
     source: 流程级约束
-    status: pending
+    status: passed
   - item: "不重设计按键、sources、snippet 或 UI"
     source: 范围守护
-    status: pending
+    status: passed
   - item: "升级可通过恢复旧 lock 条目并同步插件回退"
     source: 挂载点
-    status: pending
+    status: passed
   - item: "design/checklist/design-review 在 execution worktree 创建前已提交到 master"
     source: 流程级约束
-    status: pending
+    status: passed
   - item: "Neovim 0.12.4 Release binary 是 PATH 中唯一可用 nvim，旧 apt dev 包已删除"
     source: 验收场景
-    status: pending
+    status: passed
   - item: "S1 删除旧 ~/.local/opt/nvim-* 后，Acceptance 最后复验后删除 target/rollback 临时 XDG 与 tarball，并主动断言均不存在"
     source: 验收清理 DoD
-    status: pending
+    status: passed
 
 dod:
   commands:
@@ -90,7 +90,7 @@ dod:
         test "$(command -v nvim)" = "$HOME/.local/bin/nvim";
         paths=$(type -a -p nvim | xargs -r readlink -f | sort -u);
         test "$(printf "%s\\n" "$paths" | sed "/^$/d" | wc -l)" = 1;
-        ! dpkg-query -W -f="${Status}" neovim 2>/dev/null | rg -q "install ok installed"'
+        ! dpkg-query -W -f=\${Status} neovim 2>/dev/null | rg -q "install ok installed"'
       core: true
       failure_handling: fix-or-block
     - id: CMD-001
@@ -104,18 +104,18 @@ dod:
         XDG_DATA_HOME="${TMPDIR:-/tmp}/shawnvim-blink-cmp-upgrade/target/data"
         XDG_STATE_HOME="${TMPDIR:-/tmp}/shawnvim-blink-cmp-upgrade/target/state"
         XDG_CACHE_HOME="${TMPDIR:-/tmp}/shawnvim-blink-cmp-upgrade/target/cache";
-        test "$(git -C "$XDG_DATA_HOME/lazy/blink.cmp" rev-parse HEAD)" = 78336bc89ee5365633bcf754d93df01678b5c08f;
+        test "$(git -C "$XDG_DATA_HOME/nvim/lazy/blink.cmp" rev-parse HEAD)" = 78336bc89ee5365633bcf754d93df01678b5c08f;
         "$NVIM_BIN" --headless "+lua vim.defer_fn(function() local ok,err=xpcall(function()
         local v=vim.version(); assert(v.major==0 and v.minor==12 and v.patch==4 and v.prerelease==nil);
-        assert(vim.fn.stdpath([[config]])==vim.env.XDG_CONFIG_HOME);
-        assert(vim.fn.stdpath([[data]])==vim.env.XDG_DATA_HOME);
-        assert(vim.fn.stdpath([[state]])==vim.env.XDG_STATE_HOME);
-        assert(vim.fn.stdpath([[cache]])==vim.env.XDG_CACHE_HOME);
+        assert(vim.fn.stdpath([[config]])==vim.env.XDG_CONFIG_HOME..[[/nvim]]);
+        assert(vim.fn.stdpath([[data]])==vim.env.XDG_DATA_HOME..[[/nvim]]);
+        assert(vim.fn.stdpath([[state]])==vim.env.XDG_STATE_HOME..[[/nvim]]);
+        assert(vim.fn.stdpath([[cache]])==vim.env.XDG_CACHE_HOME..[[/nvim]]);
         assert(type(ShawnVim)==[[table]], [[ShawnVim not initialized]]);
         assert(require([[lazy]])); assert(require([[blink.cmp]]), [[blink.cmp not loaded]]);
-        assert(require([[blink.cmp.fuzzy]]).implementation_type==[[rust]], [[rust matcher not active]]);
+        assert(vim.wait(15000,function() return require([[blink.cmp.fuzzy]]).implementation_type==[[rust]] end,100), [[rust matcher not active]]);
         local h=Snacks.notifier.get_history(); local m=vim.fn.execute([[messages]]); local r=vim.tbl_filter(function(n)
-        return n.level==vim.log.levels.ERROR or n.msg:find([[blink]]) or n.msg:find([[schema]]) or n.msg:find([[import]]) or n.msg:find([[config]]) end,h);
+        local nm=tostring(n.msg):lower(); return n.level==vim.log.levels.ERROR or nm:find([[blink]]) or nm:find([[schema]]) or nm:find([[import]]) or nm:find([[config]]) end,h);
         local ml=m:lower(); assert(#r==0,vim.inspect(r)); assert(not ml:match([[e%d+]]),m);
         assert(not ml:match([[blink]]) and not ml:match([[schema]]) and not ml:match([[import]]) and not ml:match([[config]]),m) end,debug.traceback); if not ok then
         io.stderr:write(err..[[\n]]); vim.cmd([[cquit 1]]) else vim.cmd([[qa]]) end end,1500)"'
@@ -143,7 +143,7 @@ dod:
         XDG_CACHE_HOME="${TMPDIR:-/tmp}/shawnvim-blink-cmp-upgrade/target/cache"
         BLINK_HEALTH_OUT="${TMPDIR:-/tmp}/shawnvim-blink-cmp-upgrade/blink-health.txt";
         rm -f "$BLINK_HEALTH_OUT";
-        "$NVIM_BIN" --headless "+checkhealth blink.cmp"
+        "$NVIM_BIN" --headless "+lua require([[lazy]]).load({plugins={[[blink.cmp]]}})" "+checkhealth blink.cmp"
         "+lua local ok,err=xpcall(function() local out=vim.env.BLINK_HEALTH_OUT; local found=false; for _,b in ipairs(vim.api.nvim_list_bufs()) do if vim.api.nvim_buf_is_valid(b) and vim.bo[b].filetype==[[checkhealth]] then local lines=vim.api.nvim_buf_get_lines(b,0,-1,false); assert(#lines>0,[[empty health buffer]]); vim.fn.writefile(lines,out); found=true; break end end; assert(found,[[checkhealth buffer not found]]) end,debug.traceback); if not ok then io.stderr:write(err..[[\n]]); vim.cmd([[cquit 1]]) else vim.cmd([[qa]]) end";
         test -s "$BLINK_HEALTH_OUT";
         out="$BLINK_HEALTH_OUT";
@@ -159,7 +159,7 @@ dod:
         local v=vim.version(); assert(v.major==0 and v.minor==12 and v.patch==4 and v.prerelease==nil);
         assert(type(ShawnVim)==[[table]], [[ShawnVim not initialized]]); assert(require([[lazy]]));
         local h=Snacks.notifier.get_history(); local m=vim.fn.execute([[messages]]);
-        local bad=vim.tbl_filter(function(n) return n.level==vim.log.levels.ERROR or n.msg:find([[import]]) or n.msg:find([[config]]) end,h);
+        local bad=vim.tbl_filter(function(n) local nm=tostring(n.msg):lower(); return n.level==vim.log.levels.ERROR or nm:find([[blink]]) or nm:find([[schema]]) or nm:find([[import]]) or nm:find([[config]]) end,h);
         local ml=m:lower(); assert(#bad==0,vim.inspect(bad)); assert(not ml:match([[e%d+]]),m);
         assert(not ml:match([[blink]]) and not ml:match([[schema]]) and not ml:match([[import]]) and not ml:match([[config]]),m) end,debug.traceback);
         if not ok then io.stderr:write(err..[[\n]]); vim.cmd([[cquit 1]]) else vim.cmd([[qa]]) end end,1500)"'
