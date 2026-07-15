@@ -25,13 +25,7 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
   spec = {
-    {
-      dir = vim.fn.stdpath("config"),
-      name = "ShawnVim",
-      import = "shawnvim.plugins",
-      priority = 10000,
-      lazy = false,
-    },
+    { import = "shawnvim.plugins" },
     { import = "plugins" },
   },
   defaults = {

@@ -85,8 +85,8 @@ return {
         enabled = true,
         keymap = {
           preset = "cmdline",
-          ["<Right>"] = false,
-          ["<Left>"] = false,
+          ["<Right>"] = {},
+          ["<Left>"] = {},
         },
         completion = {
           list = { selection = { preselect = false } },
