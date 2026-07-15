@@ -14,7 +14,7 @@ return {
   },
   {
     "saghen/blink.cmp",
-    version = not vim.g.shawnvim_blink_main and "*",
+    version = not vim.g.shawnvim_blink_main and "1.10.2",
     build = vim.g.shawnvim_blink_main and "cargo build --release",
     opts_extend = {
       "sources.completion.enabled_providers",
@@ -101,7 +101,7 @@ return {
 
       keymap = {
         preset = "enter",
-        ["<C-y>"] = { "select_and_accept" },
+        ["<C-y>"] = { "select_and_accept", "fallback" },
       },
     },
     ---@param opts blink.cmp.Config | { sources: { compat: string[] } }
