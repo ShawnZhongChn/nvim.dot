@@ -1,0 +1,20 @@
+{
+  "base_ref": "master",
+  "branch": "feat/blink-cmp-upgrade",
+  "context_check": ".codestable/features/2026-07-15-upgrade-blink-cmp/upgrade-blink-cmp-learning-context-check.json",
+  "context_check_abs": "/home/shawn/.config/nvim-worktrees/blink-cmp-upgrade/nvim/.codestable/features/2026-07-15-upgrade-blink-cmp/upgrade-blink-cmp-learning-context-check.json",
+  "covered_diff": "master...47c65d64f13977721382c2c5882fb1a51023468a",
+  "covered_head": "47c65d64f13977721382c2c5882fb1a51023468a",
+  "created_at": "2026-07-15T13:56:28Z",
+  "last_seen_at": "2026-07-15T13:56:28Z",
+  "learning_report": ".codestable/features/2026-07-15-upgrade-blink-cmp/upgrade-blink-cmp-learning-report.md",
+  "learning_report_abs": "/home/shawn/.config/nvim-worktrees/blink-cmp-upgrade/nvim/.codestable/features/2026-07-15-upgrade-blink-cmp/upgrade-blink-cmp-learning-report.md",
+  "merge_readiness": ".codestable/features/2026-07-15-upgrade-blink-cmp/upgrade-blink-cmp-merge-readiness.json",
+  "merge_readiness_abs": "/home/shawn/.config/nvim-worktrees/blink-cmp-upgrade/nvim/.codestable/features/2026-07-15-upgrade-blink-cmp/upgrade-blink-cmp-merge-readiness.json",
+  "next_action": "merge feat/blink-cmp-upgrade into master after owner approval",
+  "schema_version": 1,
+  "snoozed_until": null,
+  "status": "ready-to-merge",
+  "unit": ".codestable/features/2026-07-15-upgrade-blink-cmp",
+  "worktree": "/home/shawn/.config/nvim-worktrees/blink-cmp-upgrade/nvim"
+}
