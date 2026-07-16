@@ -10,10 +10,10 @@ ShawnVim 是基于 LazyVim 16.0.0 固定源码快照进行独立维护的 Neovim
 
 ShawnVim 的架构事实由当前源码和固定上游文档快照共同提供，但适用范围不同：
 
-1. 当前仓库源码决定精确运行行为；源码与其他资料冲突时，以源码为准（`README.md:3`、`lua/config/lazy.lua:26-48`）。
-2. `docs/` 是 LazyVim 固定版本的上游开发文档快照，可作为 ShawnVim 未分叉部分的架构基线；其来源固定在 `lazyvim.github.io` commit `85e5b49e5bf0a4208bd9d1600e1710f4bb6c0e9c`（`README.md:21-28`、`UPSTREAM-DOCS.md:1-8`）。
+1. `docs/` 是 ShawnVim 继承功能的高权威说明与预期行为基线。ShawnVim 保留了绝大多数 LazyVim 机制，因此维护任务应按当前主题优先检索相关页面，无需预先通读或全量核验 138 篇文档（`README.md:21-28`、`UPSTREAM-DOCS.md:1-8`）。
+2. 当前仓库源码决定精确运行行为，`lazy-lock.json` 决定插件精确版本。它们与相关文档冲突时，应调查命名映射、本地偏离、移植遗漏或文档时效性，而不是机械忽略任一方（`README.md:3`、`lua/config/lazy.lua:26-48`）。
 3. 上游文档中的 `LazyVim`、`:LazyExtras` 和 `lazyvim.*` 在未改变机制时分别映射为 `ShawnVim`、`:ShawnExtras` 和 `shawnvim.*`；精确名称以当前源码为准（`lua/shawnvim/config/init.lua:1-7`、`lua/shawnvim/config/init.lua:201-208`）。
-4. 本地 issue、feature 与实现记录描述已经发生的 ShawnVim 演进，并覆盖对应上游快照。当前明确覆盖点包括 Neovim 0.12.4 和 blink.cmp 1.10.2；blink 上游快照仍含旧按键值和稳定版范围，不能用于判断当前 blink 精确行为（`.codestable/features/2026-07-15-upgrade-blink-cmp/upgrade-blink-cmp-implementation.md:8-27`、`docs/extras/coding/blink.md:84-118`、`lua/shawnvim/plugins/extras/coding/blink.lua:1-15`）。
+4. 本地 issue、feature 与实现记录描述已经发生的 ShawnVim 演进，并覆盖对应上游说明。当前明确覆盖点包括 Neovim 0.12.4 和 blink.cmp 1.10.2；blink 上游文档仍含旧按键值和稳定版范围，不能用于判断当前 blink 精确行为（`.codestable/features/2026-07-15-upgrade-blink-cmp/upgrade-blink-cmp-implementation.md:8-27`、`docs/extras/coding/blink.md:84-118`、`lua/shawnvim/plugins/extras/coding/blink.lua:1-15`）。
 5. `doc/ShawnVim.txt` 是 Neovim `:help` 面向用户的帮助入口；它与 `docs/` 同属文档呈现层，不替代内部架构地图（`README.md:21-22`、`doc/ShawnVim.txt:1-12`）。
 
 ## 3. 术语
@@ -41,7 +41,7 @@ flowchart TD
     R["运行时工具层<br/>lua/shawnvim/util/init.lua:1-35"]
     P["第三方插件运行时<br/>lazy-lock.json"]
     S["持久状态 shawnvim.json<br/>lua/shawnvim/config/init.lua:140-168"]
-    D["上游架构基线 docs/<br/>UPSTREAM-DOCS.md:3-8"]
+    D["继承语义基线 docs/<br/>UPSTREAM-DOCS.md:3-8"]
     H["Neovim 用户帮助 doc/<br/>README.md:21-22"]
 
     N --> B

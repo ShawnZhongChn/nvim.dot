@@ -18,7 +18,7 @@ nvim
 - `lua/shawnvim/`：ShawnVim 发行版核心。
 - `lua/config/`：用户 options、keymaps 和 autocmds。
 - `lua/plugins/`：用户插件扩展。
-- `docs/`：固定版本的上游开发文档 Markdown，共 138 个文件。
+- `docs/`：固定版本的 LazyVim 上游文档，共 138 篇；因 ShawnVim 保留了绝大多数上游机制，它们是继承功能的高权威说明与预期行为基线，按具体主题查阅。
 - `doc/ShawnVim.txt`：Neovim help 文档。
 
 ## 来源
