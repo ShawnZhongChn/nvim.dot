@@ -1,0 +1,134 @@
+feature: 2026-07-16-dashboard-logo-selector
+created: 2026-07-16
+
+steps:
+  - action: "S0 范围基线：在任何 production/test 文件改动前执行 CMD-000，保存 HEAD 与 NUL-safe porcelain artifact"
+    exit_signal: "dashboard-logo-selector-implementation-baseline.json 以 exclusive-create 生成，version=1、git_head 等于当前实现基准且 status_porcelain_z_base64 可解码为 --untracked-files=all 文件级 porcelain；第二次 CMD-000 必须失败并保持 artifact byte-for-byte 不变，后续命令遇缺失/损坏/HEAD 不匹配时失败"
+    status: pending
+  - action: "S1 Registry/resolver：落盘两款已确认霓虹 Header 与纯读取 provider 契约"
+    exit_signal: "隔离 headless spec 确认 registry 恰好两项、ID/label 唯一、顺序固定、Header 逐字匹配 design、每份六行/宽度58/无 tab/尾随空格，默认值为 neon-title-unicode"
+    status: pending
+  - action: "S2 事务选择：接通 dashboard_logo、原子 JSON save、幂等选择和具 payload 的 User 事件"
+    exit_signal: "隔离 JSON spec 确认选择跨进程保留；缺失/未知/非字符串值回退且不覆写；同 ID 不写盘不发事件；open/rename 等声明支持的失败保持旧内存/旧文件且无残留 temp，清理失败会报告残留路径"
+    status: pending
+  - action: "S3 初始读取：让 Snacks、dashboard-nvim、Alpha、mini.starter 从 provider 获取初始 Header"
+    exit_signal: "静态 guard 确认四类 starter 不再包含旧 Header 或复制 registry，并且按钮 key/desc/action/顺序与布局配置无语义变化"
+    status: pending
+  - action: "S4 Picker：增加 <leader>uo 两项 vertical Snacks picker 并接入最终 select 契约"
+    exit_signal: "真实 UI 中只显示两项且 preview pane 逐项显示精确六行 Header；确认成功才关闭，取消零副作用，保存失败保持 picker 打开；既有 UI mappings 无变化"
+    status: pending
+  - action: "S5 已安装 adapter：完成 Snacks 与 mini.starter 的当前可见页面刷新"
+    exit_signal: "两类 starter 分别证明事件后所有可见 Dashboard buffer 命中当前 Header 稳定首行；普通编辑 buffer 不被切换，adapter failure 通知不回滚已保存选择"
+    status: pending
+  - action: "S6 可选 adapter：在隔离环境核实并完成 Alpha 与 dashboard-nvim 刷新契约"
+    exit_signal: "锁定源码/API 证据落盘，两类 starter 分别满足刷新后 Header postcondition；若 API 不支持则保持本步未完成并返回 design，不以普通 redraw 代替"
+    status: pending
+  - action: "S7 UI/清洁度收尾：用统一 QA wrapper 完成两款、重启、窗口、字符与四类单一 starter matrix"
+    exit_signal: "tests/dashboard_logo_matrix.sh 用临时 XDG/config 副本、单一 starter 与 trap 清理完成两款 preview/确认/取消/重启、80列/窄窗口、focus、Unicode/Nerd Font 和四类 matrix；CMD-001至CMD-008通过，日常 JSON/lock checksum 不变且 status 符合 feature allowlist"
+    status: pending
+
+checks:
+  - item: "implementation baseline 在任何代码/测试改动前创建并保留至 acceptance，后续命令只能消费且不得重生成"
+    source: "design#2.4-S0"
+    status: pending
+  - item: "两款 preset 的 ID、label、metadata 与精确六行 Header 符合 design，默认值为 neon-title-unicode"
+    source: "design#1.3"
+    status: pending
+  - item: "presets/current 返回 defensive copy；current 永远返回有效成品，持久值只保存 dashboard_logo 稳定 ID"
+    source: "design#2.1"
+    status: pending
+  - item: "save(candidate?) 只承诺磁盘原子性；Logo 用 defensive candidate 并在保存成功后提交内存，legacy 无参 caller 保持现有内存语义；失败清理 temp并报告残留路径"
+    source: "design#1.4-decision-6"
+    status: pending
+  - item: "选择遵守 validate → atomic save → memory commit → event schedules refresh → select true → close → scheduled refresh；listener 错误隔离且不改变选择结果"
+    source: "design#2.2"
+    status: pending
+  - item: "User ShawnVimDashboardLogoChanged 只在 ID 实际变化且保存成功后发布，并携带 old_id/new_id"
+    source: "design#1.4-decision-7"
+    status: pending
+  - item: "<leader>uo 是唯一新增 UI 入口；运行时冲突会停止报告而非覆盖"
+    source: "design#3.1-scenario-10"
+    status: pending
+  - item: "dashboard_logo 是向后兼容可选字段，不提升 JSON version 或引入 migration"
+    source: "design#1.4-decision-5"
+    status: pending
+  - item: "四类 starter 从共享 provider 读取 Header，刷新后可见 buffer 与当前 preset 对应"
+    source: "design#1.5"
+    status: pending
+  - item: "只提供两款霓虹 Logo，不包含极客终端、安静极简、独立维度 picker 或轮换逻辑"
+    source: "design#1.1-scope"
+    status: pending
+  - item: "不新增或改变 Dashboard 按钮、按钮快捷键、顺序、动作和布局配置"
+    source: "design#3.2"
+    status: pending
+  - item: "不新增第三方依赖、字体安装逻辑或仓库 lockfile 变化"
+    source: "design#1.1-scope"
+    status: pending
+  - item: "无 dashboard_logo 时显示 neon-title-unicode 且不改写 JSON"
+    source: "design#3.1-scenario-1"
+    status: pending
+  - item: "picker 只显示两项并逐项预览精确 Header，确认/取消/失败关闭语义符合设计"
+    source: "design#3.1-scenarios-2-4"
+    status: pending
+  - item: "同 ID 幂等、重启保留选择、无效值与保存失败遵守回退契约"
+    source: "design#3.1-scenarios-5-7"
+    status: pending
+  - item: "Snacks、mini.starter、Alpha、dashboard-nvim 单独启用时初始读取和事件刷新均通过"
+    source: "design#3.1-scenario-8"
+    status: pending
+  - item: "80列下两款完整可读；窄窗口不报错且缺 Nerd Font 时可改选 Unicode 项"
+    source: "design#3.1-scenario-9"
+    status: pending
+  - item: "baseline/current 统一使用 porcelain v1 -z --untracked-files=all 并正确解析 rename/copy 双路径；只允许 design 1.6 枚举差值，拒绝日常 JSON/lock 与其他路径变化"
+    source: "design#1.6-cleanliness"
+    status: pending
+
+dod:
+  commands:
+    - id: CMD-000
+      command: >-
+        python3 -c 'import base64,json,pathlib,subprocess;
+        p=pathlib.Path(".codestable/features/2026-07-16-dashboard-logo-selector/dashboard-logo-selector-implementation-baseline.json");
+        d={"version":1,"git_head":subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),"status_porcelain_z_base64":base64.b64encode(subprocess.check_output(["git","status","--porcelain=v1","-z","--untracked-files=all"])).decode()};
+        p.open("x").write(json.dumps(d,indent=2)+"\n")'
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-001
+      command: "bash tests/dashboard_logo_matrix.sh --status --baseline .codestable/features/2026-07-16-dashboard-logo-selector/dashboard-logo-selector-implementation-baseline.json"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-002
+      command: "bash tests/dashboard_logo_matrix.sh --startup --baseline .codestable/features/2026-07-16-dashboard-logo-selector/dashboard-logo-selector-implementation-baseline.json"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-003
+      command: "bash tests/dashboard_logo_matrix.sh --registry --baseline .codestable/features/2026-07-16-dashboard-logo-selector/dashboard-logo-selector-implementation-baseline.json"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-004
+      command: "bash tests/dashboard_logo_matrix.sh --persistence --baseline .codestable/features/2026-07-16-dashboard-logo-selector/dashboard-logo-selector-implementation-baseline.json"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-005
+      command: "bash tests/dashboard_logo_matrix.sh --source --baseline .codestable/features/2026-07-16-dashboard-logo-selector/dashboard-logo-selector-implementation-baseline.json"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-006
+      command: "bash tests/dashboard_logo_matrix.sh --format --baseline .codestable/features/2026-07-16-dashboard-logo-selector/dashboard-logo-selector-implementation-baseline.json"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-007
+      command: "bash tests/dashboard_logo_matrix.sh --verify-state --baseline .codestable/features/2026-07-16-dashboard-logo-selector/dashboard-logo-selector-implementation-baseline.json"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-008
+      command: "bash tests/dashboard_logo_matrix.sh --all --baseline .codestable/features/2026-07-16-dashboard-logo-selector/dashboard-logo-selector-implementation-baseline.json"
+      core: true
+      failure_handling: fix-or-block
+  evidence_required: [command_output, diff_summary, runtime_ui, starter_matrix, persistence_fixture, state_checksums]
+  cleanliness:
+    debug_output: forbidden
+    temporary_todo_fixme: forbidden
+    commented_old_header: forbidden
+    daily_shawnvim_json_test_write: forbidden
+    undeclared_lock_change: forbidden
